@@ -20,7 +20,7 @@ console.log('Store path:'+store_path);
  *
  * @returns {Promise.<TResult>}
  */
-export function executeQuery(fabricClient, chainCodeId, queryFunc, args) {
+export function executeQuery(fabricClient, channel, chainCodeId, queryFunc, args) {
     // create the key value store as defined in the fabric-client/config/default.json 'key-value-store' setting
     return fabricClient.newDefaultKeyValueStore({
         path: store_path
@@ -36,7 +36,7 @@ export function executeQuery(fabricClient, chainCodeId, queryFunc, args) {
             args: args //['']
         };
 
-        executeQueryFor(userFromStore, request)
+        executeQueryFor(userFromStore, channel, request)
     }).then((response) => {
         return handleResponse(response)
     }).catch((err) => {
@@ -61,7 +61,7 @@ function getUserContext(userID) {
     return fabric_client.getUserContext(userID, true);
 }
 
-function executeQueryFor(userFromStore, request) {
+function executeQueryFor(userFromStore, channel, request) {
     if (userFromStore && userFromStore.isEnrolled()) {
         console.log('Successfully loaded user from persistence', userFromStore);
     } else {

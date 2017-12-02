@@ -21,7 +21,6 @@ cd ../../fabric-test/fabric-samples/basic-network/
 ./start.sh
 
 # Now launch the CLI container in order to install, instantiate chaincode
-# and prime the ledger with our 10 cars
 docker-compose -f ./docker-compose.yml up -d cli
 
 docker exec cli peer chaincode install -n vote -v 1.0 -p "$CC_SRC_PATH" -l "$LANGUAGE"

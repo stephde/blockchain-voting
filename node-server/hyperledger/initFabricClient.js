@@ -12,7 +12,11 @@ export function initFabricClient (host, channel) {
     let peer = fabricClient.newPeer(host); 
     channel.addPeer(peer);
 
-    return fabricClient;
+    return {
+        client: fabricClient,
+        channel: channel,
+        peer: peer
+    };
 }
 //
 
