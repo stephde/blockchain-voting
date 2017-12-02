@@ -1,5 +1,8 @@
 'use strict';
 
+let path = require('path');
+let util = require('util');
+let os = require('os');
 // ToDo: should this go into the init method ?
 var store_path = path.join(__dirname, 'hfc-key-store');
 console.log('Store path:'+store_path);
@@ -20,7 +23,7 @@ console.log('Store path:'+store_path);
  *
  * @returns {Promise.<TResult>}
  */
-export function executeQuery(fabricClient, channel, chainCodeId, queryFunc, args) {
+exports.executeQuery = function (fabricClient, channel, chainCodeId, queryFunc, args) {
     // create the key value store as defined in the fabric-client/config/default.json 'key-value-store' setting
     return fabricClient.newDefaultKeyValueStore({
         path: store_path

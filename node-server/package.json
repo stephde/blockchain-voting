@@ -1,0 +1,28 @@
+{
+  "name": "voting-server",
+  "version": "1.0.0",
+  "description": "server for access to hyperledger",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stephde/blockchain-voting.git"
+  },
+  "keywords": [
+    "Hyperledger",
+    "Blockchain"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/stephde/blockchain-voting/issues"
+  },
+  "homepage": "https://github.com/stephde/blockchain-voting#readme",
+  "dependencies": {
+    "fabric-ca-client": "^1.1.0-preview",
+    "fabric-client": "^1.1.0-preview",
+    "grpc": "^1.7.2"
+  }
+}

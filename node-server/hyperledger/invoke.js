@@ -2,6 +2,10 @@
  * Created by stephde on 02.12.17.
  */
 
+let path = require('path');
+let util = require('util');
+let os = require('os');
+
 let store_path = path.join(__dirname, 'hfc-key-store');
 console.log('Store path:'+store_path);
 let tx_id = null;
@@ -24,7 +28,7 @@ let tx_id = null;
  *      parameters of the transaction as array of string e.g. ['CAR1', 'user1']
  * @returns {Promise.<TResult>}
  */
-export function invokeTransaction(fabricClient, channel, chaincodeId, transactionFunc, chainId, args) {
+exports.invokeTransaction = function (fabricClient, channel, chaincodeId, transactionFunc, chainId, args) {
     // create the key value store as defined in the fabric-client/config/default.json 'key-value-store' setting
     return fabricClient.newDefaultKeyValueStore({ path: store_path
     }).then((state_store) => {

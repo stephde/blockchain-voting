@@ -4,11 +4,11 @@
 
 let Fabric_Client = require('fabric-client');
 
-export function initFabricClient (host, channel) {
+exports.initFabricClient = function (host, channelId) {
     let fabricClient = new Fabric_Client();
 
     // setup the fabric network
-    let channel = fabricClient.newChannel(channel); //
+    let channel = fabricClient.newChannel(channelId); //
     let peer = fabricClient.newPeer(host); 
     channel.addPeer(peer);
 
