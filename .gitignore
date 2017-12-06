@@ -1,2 +1,4 @@
 .idea
 node-server/node_modules
+
+platform-specific-binaries/
