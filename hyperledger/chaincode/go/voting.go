@@ -84,7 +84,7 @@ func (s *SmartContract) vote(APIstub shim.ChaincodeStubInterface, args []string)
 		vote := Vote{}
 
 		json.Unmarshal(voteAsBytes, &vote)
-		vote.Count := vote.Count + 1
+		vote.Count = vote.Count + 1
 
 		voteAsBytes, _ = json.Marshal(vote)
 		APIstub.PutState(args[0], voteAsBytes)

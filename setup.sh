@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # From http://hyperledger-fabric.readthedocs.io/en/latest/samples.html
-# Installs the Hyperledger Sample Projects
+# Installs the Hyperledger Sample Projects and Platform-specific Docker Images
 
 mkdir platform-specific-binaries
 cd platform-specific-binaries

@@ -6,7 +6,7 @@
 version: '2'
 
 networks:
-  basic:
+  voting:
 
 services:
   ca.example.com:
@@ -23,7 +23,7 @@ services:
       - ./crypto-config/peerOrganizations/org1.example.com/ca/:/etc/hyperledger/fabric-ca-server-config
     container_name: ca.example.com
     networks:
-      - basic
+      - voting
 
   orderer.example.com:
     container_name: orderer.example.com
@@ -44,7 +44,7 @@ services:
         - ./crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/:/etc/hyperledger/msp/orderer
         - ./crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/etc/hyperledger/msp/peerOrg1
     networks:
-      - basic
+      - voting
 
   peer0.org1.example.com:
     container_name: peer0.org1.example.com
@@ -60,7 +60,8 @@ services:
       # # the following setting starts chaincode containers on the same
       # # bridge network as the peers
       # # https://docs.docker.com/compose/networking/
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_basic
+      #- CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_basic
+      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=hyperledger_voting
       - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
       - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb:5984
       # The CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME and CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD
@@ -83,7 +84,7 @@ services:
       - orderer.example.com
       - couchdb
     networks:
-      - basic
+      - voting
 
   couchdb:
     container_name: couchdb
@@ -96,7 +97,7 @@ services:
     ports:
       - 5984:5984
     networks:
-      - basic
+      - voting
 
   cli:
     container_name: cli
@@ -116,9 +117,10 @@ services:
     volumes:
         - /var/run/:/host/var/run/
         - ./chaincode/go/:/opt/gopath/src/hpi.de/go
+        - ./crypto-config/peerOrganizations/:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations
         - ./chaincode/hyperledger/:/opt/gopath/src/github.com/hyperledger
     networks:
-        - basic
+        - voting
     #depends_on:
     #  - orderer.example.com
     #  - peer0.org1.example.com
