@@ -2,6 +2,7 @@
  * Created by stephde on 02.12.17.
  */
 
+let Fabric = require('fabric-client');
 let path = require('path');
 let util = require('util');
 let os = require('os');
@@ -30,8 +31,13 @@ let tx_id = null;
  */
 exports.invokeTransaction = function (fabricClient, channel, chaincodeId, transactionFunc, chainId, args) {
     // create the key value store as defined in the fabric-client/config/default.json 'key-value-store' setting
-    return fabricClient.newDefaultKeyValueStore({ path: store_path
-    }).then((state_store) => {
+
+    return Fabric.newDefaultKeyValueStore({
+        path: store_path
+    }).then((stateStore) => {
+        // assign the store to the fabric client
+        fabricClient.setStateStore(stateStore);
+
         return getUserContext('user1');
     }).then((userFromStore) => {
 
@@ -74,18 +80,16 @@ exports.invokeTransaction = function (fabricClient, channel, chaincodeId, transa
 
 // -------------------- private functions --------------------- //
 
-function getUserContext(userID) {
-    // assign the store to the fabric client
-    fabric_client.setStateStore(state_store);
-    let crypto_suite = Fabric_Client.newCryptoSuite();
+function getUserContext(fabricClient, userID) {
+    let crypto_suite = Fabric.newCryptoSuite();
     // use the same location for the state store (where the users' certificate are kept)
     // and the crypto store (where the users' keys are kept)
-    let crypto_store = Fabric_Client.newCryptoKeyStore({path: store_path});
+    let crypto_store = Fabric.newCryptoKeyStore({path: store_path});
     crypto_suite.setCryptoKeyStore(crypto_store);
-    fabric_client.setCryptoSuite(crypto_suite);
+    fabricClient.setCryptoSuite(crypto_suite);
 
     // get the enrolled user from persistence, this user will sign all requests
-    return fabric_client.getUserContext(userID, true);
+    return fabricClient.getUserContext(userID, true);
 }
 
 function proposeTransaction(fabricClient, channel, userFromStore, request) {

@@ -1,4 +1,5 @@
 .idea
 node-server/node_modules
+node-server/package-lock.json
 
 platform-specific-binaries/

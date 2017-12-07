@@ -12,11 +12,16 @@ exports.initFabricClient = function (host, channelId) {
     let peer = fabricClient.newPeer(host); 
     channel.addPeer(peer);
 
-    return {
+
+    let clientWrapper = {
         client: fabricClient,
         channel: channel,
         peer: peer
     };
+
+    console.log("Fabric client has been initialized with : ", clientWrapper);
+
+    return clientWrapper;
 }
 //
 
