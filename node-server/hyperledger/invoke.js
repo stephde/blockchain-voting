@@ -9,7 +9,7 @@ let os = require('os');
 
 let store_path = path.join(__dirname, 'hfc-key-store');
 console.log('Store path:'+store_path);
-let tx_id = null;
+let tx_Id = null;
 
 /**
  * This function invokes a transaction on hypeledger with the given parameters.
@@ -38,8 +38,19 @@ exports.invokeTransaction = function (fabricClient, channel, chaincodeId, transa
         // assign the store to the fabric client
         fabricClient.setStateStore(stateStore);
 
-        return getUserContext('user1');
+        // TODO replace string
+        return getUserContext(fabricClient, 'user1');
     }).then((userFromStore) => {
+        if (userFromStore && userFromStore.isEnrolled()) {
+      		console.log('Successfully loaded user1 from persistence');
+      		member_user = userFromStore;
+      	} else {
+      		throw new Error('Failed to get user1.... run registerUser.js');
+      	}
+
+        // get a transaction id object based on the current user assigned to fabric client
+        tx_Id = fabricClient.newTransactionID();
+        console.log("Assigning transaction_id: ", tx_Id._transaction_id);
 
         // createCar chaincode function - requires 5 args, ex: args: ['CAR12', 'Honda', 'Accord', 'Black', 'Tom'],
         // changeCarOwner chaincode function - requires 2 args , ex: args: ['CAR10', 'Barry'],
@@ -50,7 +61,7 @@ exports.invokeTransaction = function (fabricClient, channel, chaincodeId, transa
             fcn: transactionFunc, //'',
             args: args, //[''],
             chainId: chainId, //'mychannel',
-            txId: tx_id
+            txId: tx_Id
         };
 
         // send the transaction proposal to the peers
@@ -58,7 +69,6 @@ exports.invokeTransaction = function (fabricClient, channel, chaincodeId, transa
     }).then((results) => {
         let proposalResponses = results[0];
         let proposal = results[1];
-
         //throws an error if proposal was rejected
         checkProposalResponse(proposalResponses);
 
@@ -98,11 +108,7 @@ function proposeTransaction(fabricClient, channel, userFromStore, request) {
     } else {
         throw new Error('Failed to get user1.... run registerUser.js');
     }
-
-    // get a transaction id object based on the current user assigned to fabric client
-    tx_id = fabricClient.newTransactionID();
-    console.log("Assigning transaction_id: ", tx_id._transaction_id);
-
+    console.log(request);
     // send the transaction proposal to the peers
     return channel.sendTransactionProposal(request);
 }
@@ -150,7 +156,7 @@ function sendTransaction(fabricClient, channel, request) {
     // set the transaction listener and set a timeout of 30 sec
     // if the transaction did not get committed within the timeout period,
     // report a TIMEOUT status
-    let transaction_id_string = tx_id.getTransactionID(); //Get the transaction ID string to be used by the event processing
+    let transaction_id_string = tx_Id.getTransactionID(); //Get the transaction ID string to be used by the event processing
     var promises = [];
 
     let sendPromise = channel.sendTransaction(request);

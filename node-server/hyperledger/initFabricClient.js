@@ -9,8 +9,10 @@ exports.initFabricClient = function (host, channelId) {
 
     // setup the fabric network
     let channel = fabricClient.newChannel(channelId); //
-    let peer = fabricClient.newPeer(host); 
+    let peer = fabricClient.newPeer(host);
     channel.addPeer(peer);
+    var order = fabricClient.newOrderer('grpc://localhost:7050')
+    channel.addOrderer(order);
 
 
     let clientWrapper = {
@@ -24,4 +26,3 @@ exports.initFabricClient = function (host, channelId) {
     return clientWrapper;
 }
 //
-

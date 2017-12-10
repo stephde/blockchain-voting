@@ -6,8 +6,6 @@ let util = require('util');
 let os = require('os');
 // ToDo: should this go into the init method ?
 var store_path = path.join(__dirname, 'hfc-key-store');
-console.log('Store path:'+store_path);
-
 
 /**
  * This function executes a query against the given hyperledger client and returns a promise which
@@ -43,7 +41,7 @@ exports.executeQuery = function (fabricClient, channel, chainCodeId, queryFunc, 
             args: args //['']
         };
 
-        executeQueryFor(userFromStore, channel, request)
+        return executeQueryFor(userFromStore, channel, request)
     }).then((response) => {
         return handleResponse(response)
     }).catch((err) => {
@@ -68,7 +66,7 @@ function getUserContext(fabricClient, userID) {
 
 function executeQueryFor(userFromStore, channel, request) {
     if (userFromStore && userFromStore.isEnrolled()) {
-        console.log('Successfully loaded user from persistence', userFromStore);
+        //console.log('Successfully loaded user from persistence', userFromStore);
     } else {
         throw new Error('Failed to get user.... run registerUser.js');
     }
@@ -77,16 +75,15 @@ function executeQueryFor(userFromStore, channel, request) {
     return channel.queryByChaincode(request);
 }
 
-function handleResponse(queryResponse) {
+function handleResponse(queryResponses) {
     console.log("Query has completed, checking results");
     // query_responses could have more than one  results if there multiple peers were used as targets
-    
     if (queryResponses && queryResponses.length == 1) {
         if (queryResponses[0] instanceof Error) {
             console.error("error from query = ", queryResponses[0]);
         } else {
             console.log("Response is ", queryResponses[0].toString());
-            return queryResponse[0];
+            return queryResponses[0];
         }
     } else {
         console.log("No payloads were returned from query");
