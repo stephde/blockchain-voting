@@ -1,5 +1,6 @@
 .idea
 node-server/node_modules
 node-server/package-lock.json
-
+node-server/hyperledger/hfc-key-store/
 platform-specific-binaries/
+fabric-test
