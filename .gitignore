@@ -4,3 +4,4 @@ node-server/package-lock.json
 node-server/hyperledger/hfc-key-store/
 platform-specific-binaries/
 fabric-test
+node-server/votingApp/node_modules

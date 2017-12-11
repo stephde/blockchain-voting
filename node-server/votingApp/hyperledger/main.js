@@ -8,10 +8,8 @@ let hyperledger;
 function run() {
     hyperledger = new Hyperledger();
     hyperledger.queryAll();
-    hyperledger.vote('Yellow');
-    setTimeout(hyperledger.queryAll, 3000);
-
-
+    //hyperledger.vote('Yellow');
+    //setTimeout(hyperledger.queryAll, 3000);
 
 }
 

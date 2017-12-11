@@ -43,7 +43,7 @@ exports.executeQuery = function (fabricClient, channel, chainCodeId, queryFunc, 
 
         return executeQueryFor(userFromStore, channel, request)
     }).then((response) => {
-        return handleResponse(response)
+        return handleResponse(response);
     }).catch((err) => {
         console.error('Failed to query successfully :: ' + err);
     });
@@ -89,5 +89,5 @@ function handleResponse(queryResponses) {
         console.log("No payloads were returned from query");
     }
 
-    return {};
+    return queryResponses;
 }
