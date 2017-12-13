@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 # Exit on first error
-set -ev
+set -e
 
 # don't rewrite paths for Windows Git Bash users
 export MSYS_NO_PATHCONV=1
@@ -44,7 +44,7 @@ docker exec cli peer chaincode install -n vote -v 1.0 -p "$CC_SRC_PATH" -l "$LAN
 
 printf "Instantiate chaincode"
 docker exec cli peer chaincode instantiate -o orderer.example.com:7050 -C mychannel -n vote -l "$LANGUAGE" -v 1.0 -c '{"Args":[""]}'
-sleep 10
+sleep 5
 
 printf "Invoke chaincode"
 docker exec cli peer chaincode invoke -o orderer.example.com:7050 -C mychannel -n vote -c '{"function":"initLedger","Args":[""]}'

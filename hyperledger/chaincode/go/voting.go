@@ -42,8 +42,7 @@ type SmartContract struct {
 }
 
 type Vote struct {
-	Name 	string `json:"name"`
-	Count int    `json:"count"`
+	count int    `json:"count"`
 }
 
 /*
@@ -84,8 +83,21 @@ func (s *SmartContract) vote(APIstub shim.ChaincodeStubInterface, args []string)
 		vote := Vote{}
 
 		json.Unmarshal(voteAsBytes, &vote)
-		vote.Count = vote.Count + 1
+		vote.count = vote.count + 1
 
+		voteAsBytes, _ = json.Marshal(vote)
+		APIstub.PutState(args[0], voteAsBytes)
+
+		return shim.Success(nil)
+}
+
+func (s *SmartContract) registerParty(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
+
+		if len(args) != 1 {
+			return shim.Error("Incorrect number of arguments. Expecting 1")
+		}
+
+		vote := Vote{}
 		voteAsBytes, _ = json.Marshal(vote)
 		APIstub.PutState(args[0], voteAsBytes)
 
@@ -127,25 +139,17 @@ func (s *SmartContract) queryVotes(APIstub shim.ChaincodeStubInterface, args []s
 
 	fmt.Printf("- queryAllVotes:\n%s\n", buffer.String())
 
+	// TODO: switch to buffer.String()
 	return shim.Success(buffer.Bytes())
-
 }
 
-func (s *SmartContract) initLedger(APIstub shim.ChaincodeStubInterface) sc.Response {
-  votes := []Vote{
-		Vote{Name: "Blue", Count: 0},
-		Vote{Name: "Red", Count: 0},
-		Vote{Name: "Green", Count: 0},
-		Vote{Name: "Yellow", Count: 0},
-	}
+func (s *SmartContract) initLedger(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
+	vote := Vote{}
 
-	i := 0
-	for i < len(votes) {
-		fmt.Println("i is ", i)
-		voteAsBytes, _ := json.Marshal(votes[i])
-		APIstub.PutState(votes[i].Name, voteAsBytes)
-		fmt.Println("Added", votes[i])
-		i = i + 1
+	for index, party := range args {
+		fmt.Println(index, " is ", party)
+		APIstub.PutState(party, vote)
+		fmt.Println("Added", party)
 	}
 
 	return shim.Success(nil)
