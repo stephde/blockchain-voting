@@ -5,7 +5,7 @@ var Hyperledger = require('../hyperledger/hyperledger.js')
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
+  res.render('index', { title: 'Blockchain based Voting' });
 });
 
 router.post('/voting/place', function(req, res, next) {
@@ -13,7 +13,7 @@ router.post('/voting/place', function(req, res, next) {
   hyperledger.vote(req.body.vote);
   console.log(req.body.vote);
 
-  res.render('index', { title: 'Express' });
+  res.render('index', { title: 'Voting' });
 });
 
 router.get('/voting/all', function(req, res, next) {

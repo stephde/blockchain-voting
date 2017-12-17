@@ -25,7 +25,7 @@ $( document ).ready(function() {
                'lightblue',
                'lightgreen',
                'lightcoral',
-               'lightyellow'
+               'yellow'
             ],
 
 
@@ -34,13 +34,15 @@ $( document ).ready(function() {
         var labels = [];
         $(result).each(function(_, option){
           datasets[0].data.push(option.Record.count);
-          labels.push(option.Record.name);
+          //labels.push(option.Record.name);
         });
         var ctx = document.getElementById("results");
         var formatedData = {
             datasets: datasets,
             // These labels appear in the legend and in the tooltips when hovering different arcs
-            labels: labels,
+
+            labels: [ "Michael Mayor", "Benjamin Bürgermeister", "Major Tom", "Petra Principal" ]
+            //labels: labels,
 
 
         };
