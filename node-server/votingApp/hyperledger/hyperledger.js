@@ -1,16 +1,16 @@
 
 Hyperledger = function(){
-  var initClient = require("./initFabricClient.js"),
-      query = require("./query.js"),
-      transaction = require("./invoke.js"),
-      registration = require("./registerUser.js"),
-      enroll = require("./enrollAdmin.js"),
-      invoke = require("./invoke.js"),
-      hlAdapter,
-      channel,
-      client,
-      chainCodeId = 'vote',
-      _this = this;
+    let initClient = require("./initFabricClient.js"),
+        query = require("./query.js"),
+        transaction = require("./invoke.js"),
+        registration = require("./registerUser.js"),
+        enroll = require("./enrollAdmin.js"),
+        invoke = require("./invoke.js"),
+        hlAdapter,
+        channel,
+        client,
+        chainCodeId = 'vote',
+        _this = this;
 
   const host = 'grpc://localhost:7051';
   const channelId = 'mychannel';

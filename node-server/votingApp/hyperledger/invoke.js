@@ -2,13 +2,9 @@
  * Created by stephde on 02.12.17.
  */
 
-let Fabric = require('fabric-client');
-let path = require('path');
 let util = require('util');
-let os = require('os');
+let HyperledgerUtils = require("./hyperledergerUtils");
 
-let store_path = path.join(__dirname, 'hfc-key-store');
-console.log('Store path:'+store_path);
 let tx_Id = null;
 
 /**
@@ -32,14 +28,15 @@ let tx_Id = null;
 exports.invokeTransaction = function (fabricClient, channel, chaincodeId, transactionFunc, chainId, args) {
     // create the key value store as defined in the fabric-client/config/default.json 'key-value-store' setting
 
-    return Fabric.newDefaultKeyValueStore({
-        path: store_path
-    }).then((stateStore) => {
+    return HyperledgerUtils.createDefaultKeyValueStore().then((stateStore) => {
         // assign the store to the fabric client
         fabricClient.setStateStore(stateStore);
 
+        // creates the default cryptoStore and adds it to the client
+        HyperledgerUtils.createDefaultCryptoKeyStore(fabricClient);
+
         // TODO replace string
-        return getUserContext(fabricClient, 'user1');
+        return fabricClient.getUserContext("user1", true);
     }).then((userFromStore) => {
         if (userFromStore && userFromStore.isEnrolled()) {
       		console.log('Successfully loaded user1 from persistence');
@@ -89,18 +86,6 @@ exports.invokeTransaction = function (fabricClient, channel, chaincodeId, transa
 
 
 // -------------------- private functions --------------------- //
-
-function getUserContext(fabricClient, userID) {
-    let crypto_suite = Fabric.newCryptoSuite();
-    // use the same location for the state store (where the users' certificate are kept)
-    // and the crypto store (where the users' keys are kept)
-    let crypto_store = Fabric.newCryptoKeyStore({path: store_path});
-    crypto_suite.setCryptoKeyStore(crypto_store);
-    fabricClient.setCryptoSuite(crypto_suite);
-
-    // get the enrolled user from persistence, this user will sign all requests
-    return fabricClient.getUserContext(userID, true);
-}
 
 function proposeTransaction(fabricClient, channel, userFromStore, request) {
     if (userFromStore && userFromStore.isEnrolled()) {

@@ -8,43 +8,18 @@
  * Register and Enroll a user
  */
 
-var Fabric_Client = require('fabric-client');
-var Fabric_CA_Client = require('fabric-ca-client');
-//
-// var path = require('path');
-// var util = require('util');
-// var os = require('os');
-//
-// //
-// var fabric_client = new Fabric_Client();
-var fabric_ca_client = null;
-var admin_user = null;
-var member_user = null;
-// var store_path = path.join(__dirname, 'hfc-key-store');
-// console.log(' Store path:'+store_path);
-let Fabric = require('fabric-client');
-let path = require('path');
-let util = require('util');
-let os = require('os');
-// ToDo: should this go into the init method ?
-var store_path = path.join(__dirname, 'hfc-key-store');
+let Fabric_CA_Client = require('fabric-ca-client');
+let HyperledgerUtils = require("./hyperledergerUtils");
+let fabric_ca_client = null;
+let admin_user = null;
+let member_user = null;
 
 exports.registerUser = function(fabric_client, user){
-  Fabric_Client.newDefaultKeyValueStore({ path: store_path
-  }).then((state_store) => {
+  HyperledgerUtils.createDefaultKeyValueStore().then((state_store) => {
       // assign the store to the fabric client
       fabric_client.setStateStore(state_store);
-      var crypto_suite = Fabric_Client.newCryptoSuite();
-      // use the same location for the state store (where the users' certificate are kept)
-      // and the crypto store (where the users' keys are kept)
-      var crypto_store = Fabric_Client.newCryptoKeyStore({path: store_path});
-      crypto_suite.setCryptoKeyStore(crypto_store);
-      fabric_client.setCryptoSuite(crypto_suite);
-      var	tlsOptions = {
-      	trustedRoots: [],
-      	verify: false
-      };
-      var	tlsOptions = {
+      let crypto_suite = HyperledgerUtils.createDefaultCryptoKeyStore(fabric_client);
+      let tlsOptions = {
       	trustedRoots: [],
       	verify: false
       };

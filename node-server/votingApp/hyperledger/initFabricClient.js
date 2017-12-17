@@ -11,7 +11,7 @@ exports.initFabricClient = function (host, channelId) {
     let channel = fabricClient.newChannel(channelId); //
     let peer = fabricClient.newPeer(host);
     channel.addPeer(peer);
-    var order = fabricClient.newOrderer('grpc://localhost:7050')
+    let order = fabricClient.newOrderer('grpc://localhost:7050')
     channel.addOrderer(order);
 
 
