@@ -17,11 +17,6 @@
  * under the License.
  */
 
-/*
- * The sample smart contract for documentation topic:
- * Writing Your First Blockchain Application
- */
-
 package main
 
 /* Imports
@@ -46,7 +41,7 @@ type Vote struct {
 }
 
 /*
- * The Init method is called when the Smart Contract "fabcar" is instantiated by the blockchain network
+ * The Init method is called when the Smart Contract is instantiated by the blockchain network
  * Best practice is to have any Ledger initialization in separate function -- see initLedger()
  */
 func (s *SmartContract) Init(APIstub shim.ChaincodeStubInterface) sc.Response {
@@ -54,23 +49,27 @@ func (s *SmartContract) Init(APIstub shim.ChaincodeStubInterface) sc.Response {
 }
 
 /*
- * The Invoke method is called as a result of an application request to run the Smart Contract "fabcar"
- * The calling application program has also specified the particular smart contract function to be called, with arguments
+ * The Invoke method is called as a result of an application request to run the Smart Contract
+ * The calling application program has also specified the particular smart contract function to be called,
+ * with arguments
  */
 func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response {
 
 	// Retrieve the requested Smart Contract function and arguments
 	function, args := APIstub.GetFunctionAndParameters()
 	// Route to the appropriate handler function to interact with the ledger appropriately
-	if function == "initLedger" {
-		return s.initLedger(APIstub)
-	} else if function == "vote" {
-		return s.vote(APIstub, args)
-	} else if function == "queryVotes" {
-		return s.queryVotes(APIstub, args)
+	switch function {
+	case "initLedger":
+		return s.initLedger(APIstub, args)
+	case "vote":
+		return s.initLedger(APIstub, args)
+	case "queryVotes":
+		return s.queryVotes(APIstub)
+	case "queryOptions":
+		return s.queryOptions(APIstub)
+	default:
+		return shim.Error("Invalid Smart Contract function name.")
 	}
-
-	return shim.Error("Invalid Smart Contract function name.")
 }
 
 func (s *SmartContract) vote(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
@@ -91,22 +90,42 @@ func (s *SmartContract) vote(APIstub shim.ChaincodeStubInterface, args []string)
 		return shim.Success(nil)
 }
 
-func (s *SmartContract) registerParty(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
-
-		if len(args) != 1 {
-			return shim.Error("Incorrect number of arguments. Expecting 1")
-		}
-
-		vote := Vote{}
-		voteAsBytes, _ = json.Marshal(vote)
-		APIstub.PutState(args[0], voteAsBytes)
-
-		return shim.Success(nil)
+func (s *SmartContract) queryVotes(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
+	// buffer is a JSON array containing QueryResults
+	var buffer = stateToJson(APIstub)
+	return shim.Success(buffer.String())
 }
 
+func (s *SmartContract) queryOptions(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
+	resultsIterator, err := APIstub.GetStateByRange("", "")
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	defer resultsIterator.Close()
 
-func (s *SmartContract) queryVotes(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
+	// buffer is a JSON array containing QueryResults
+	var buffer bytes.Buffer
+	buffer.WriteString("[")
 
+	bArrayMemberAlreadyWritten := false
+	for resultsIterator.HasNext() {
+		queryResponse, _ := resultsIterator.Next()
+
+		// Add a comma before array members, suppress it for the first array member
+		if bArrayMemberAlreadyWritten == true {
+			buffer.WriteString(",")
+		}
+		buffer.WriteString("\"")
+		buffer.WriteString(queryResponse.Key)
+		buffer.WriteString("\"")
+		bArrayMemberAlreadyWritten = true
+	}
+	buffer.WriteString("]")
+
+	return shim.Success(buffer.String())
+}
+
+func (s *SmartContract) stateToJson(APIstub shim.ChaincodeStubInterface) bytes.Buffer {
   resultsIterator, err := APIstub.GetStateByRange("", "")
 	if err != nil {
 		return shim.Error(err.Error())
@@ -137,10 +156,7 @@ func (s *SmartContract) queryVotes(APIstub shim.ChaincodeStubInterface, args []s
 	}
 	buffer.WriteString("]")
 
-	fmt.Printf("- queryAllVotes:\n%s\n", buffer.String())
-
-	// TODO: switch to buffer.String()
-	return shim.Success(buffer.Bytes())
+	return buffer
 }
 
 func (s *SmartContract) initLedger(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
