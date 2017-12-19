@@ -37,7 +37,7 @@ type SmartContract struct {
 }
 
 type Vote struct {
-	count int    `json:"count"`
+	count int `json:"count"`
 }
 
 /*
@@ -45,6 +45,8 @@ type Vote struct {
  * Best practice is to have any Ledger initialization in separate function -- see initLedger()
  */
 func (s *SmartContract) Init(APIstub shim.ChaincodeStubInterface) sc.Response {
+	_, args := APIstub.GetFunctionAndParameters()
+	fmt.Println("Args: ", args)
 	return shim.Success(nil)
 }
 
@@ -74,29 +76,32 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
 
 func (s *SmartContract) vote(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
 
-		if len(args) != 1 {
-			return shim.Error("Incorrect number of arguments. Expecting 1")
-		}
+	if len(args) != 1 {
+		return shim.Error("Incorrect number of arguments. Expecting 1")
+	}
 
-		voteAsBytes, _ := APIstub.GetState(args[0])
-		vote := Vote{}
+	voteAsBytes, _ := APIstub.GetState(args[0])
+	vote := Vote{}
 
-		json.Unmarshal(voteAsBytes, &vote)
-		vote.count = vote.count + 1
+	json.Unmarshal(voteAsBytes, &vote)
+	vote.count = vote.count + 1
 
-		voteAsBytes, _ = json.Marshal(vote)
-		APIstub.PutState(args[0], voteAsBytes)
+	voteAsBytes, _ = json.Marshal(vote)
+	APIstub.PutState(args[0], voteAsBytes)
 
-		return shim.Success(nil)
+	return shim.Success(nil)
 }
 
-func (s *SmartContract) queryVotes(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
+func (s *SmartContract) queryVotes(APIstub shim.ChaincodeStubInterface) sc.Response {
 	// buffer is a JSON array containing QueryResults
-	var buffer = stateToJson(APIstub)
-	return shim.Success(buffer.String())
+	buffer, err := s.stateToJson(APIstub)
+	if err != nil {
+		return shim.Error(err.Error())
+	}
+	return shim.Success(buffer.Bytes())
 }
 
-func (s *SmartContract) queryOptions(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
+func (s *SmartContract) queryOptions(APIstub shim.ChaincodeStubInterface) sc.Response {
 	resultsIterator, err := APIstub.GetStateByRange("", "")
 	if err != nil {
 		return shim.Error(err.Error())
@@ -122,22 +127,22 @@ func (s *SmartContract) queryOptions(APIstub shim.ChaincodeStubInterface, args [
 	}
 	buffer.WriteString("]")
 
-	return shim.Success(buffer.String())
+	return shim.Success(buffer.Bytes())
 }
 
-func (s *SmartContract) stateToJson(APIstub shim.ChaincodeStubInterface) bytes.Buffer {
-  resultsIterator, err := APIstub.GetStateByRange("", "")
+func (s *SmartContract) stateToJson(APIstub shim.ChaincodeStubInterface) (bytes.Buffer, error) {
+	resultsIterator, err := APIstub.GetStateByRange("", "")
+	var buffer bytes.Buffer
 	if err != nil {
-		return shim.Error(err.Error())
+		return buffer, err
 	}
 	defer resultsIterator.Close()
 
 	// buffer is a JSON array containing QueryResults
-	var buffer bytes.Buffer
 	buffer.WriteString("[")
 
 	bArrayMemberAlreadyWritten := false
-  for resultsIterator.HasNext() {
+	for resultsIterator.HasNext() {
 		queryResponse, _ := resultsIterator.Next()
 
 		// Add a comma before array members, suppress it for the first array member
@@ -156,21 +161,23 @@ func (s *SmartContract) stateToJson(APIstub shim.ChaincodeStubInterface) bytes.B
 	}
 	buffer.WriteString("]")
 
-	return buffer
+	return buffer, nil
 }
 
 func (s *SmartContract) initLedger(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
 	vote := Vote{}
 
+	//TODO: clear state
+
 	for index, party := range args {
 		fmt.Println(index, " is ", party)
-		APIstub.PutState(party, vote)
+		voteAsBytes, _ := json.Marshal(vote)
+		APIstub.PutState(party, voteAsBytes)
 		fmt.Println("Added", party)
 	}
 
 	return shim.Success(nil)
 }
-
 
 // The main function is only relevant in unit test mode. Only included here for completeness.
 func main() {
