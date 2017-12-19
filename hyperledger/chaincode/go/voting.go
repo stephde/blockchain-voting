@@ -32,6 +32,8 @@ import (
 	sc "github.com/hyperledger/fabric/protos/peer"
 )
 
+var logger = shim.NewLogger("myChaincode")
+
 // Define the Smart Contract structure
 type SmartContract struct {
 }
@@ -45,8 +47,6 @@ type Vote struct {
  * Best practice is to have any Ledger initialization in separate function -- see initLedger()
  */
 func (s *SmartContract) Init(APIstub shim.ChaincodeStubInterface) sc.Response {
-	_, args := APIstub.GetFunctionAndParameters()
-	fmt.Println("Args: ", args)
 	return shim.Success(nil)
 }
 
@@ -61,10 +61,10 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
 	function, args := APIstub.GetFunctionAndParameters()
 	// Route to the appropriate handler function to interact with the ledger appropriately
 	switch function {
-	case "initLedger":
-		return s.initLedger(APIstub, args)
+	case "initVote":
+		return s.initVote(APIstub, args)
 	case "vote":
-		return s.initLedger(APIstub, args)
+		return s.vote(APIstub, args)
 	case "queryVotes":
 		return s.queryVotes(APIstub)
 	case "queryOptions":
@@ -94,7 +94,7 @@ func (s *SmartContract) vote(APIstub shim.ChaincodeStubInterface, args []string)
 
 func (s *SmartContract) queryVotes(APIstub shim.ChaincodeStubInterface) sc.Response {
 	// buffer is a JSON array containing QueryResults
-	buffer, err := s.stateToJson(APIstub)
+	buffer, err := s.stateToJSON(APIstub)
 	if err != nil {
 		return shim.Error(err.Error())
 	}
@@ -114,6 +114,7 @@ func (s *SmartContract) queryOptions(APIstub shim.ChaincodeStubInterface) sc.Res
 
 	bArrayMemberAlreadyWritten := false
 	for resultsIterator.HasNext() {
+		logger.Info("First for iteration")
 		queryResponse, _ := resultsIterator.Next()
 
 		// Add a comma before array members, suppress it for the first array member
@@ -127,10 +128,12 @@ func (s *SmartContract) queryOptions(APIstub shim.ChaincodeStubInterface) sc.Res
 	}
 	buffer.WriteString("]")
 
+	logger.Info(buffer.String())
+
 	return shim.Success(buffer.Bytes())
 }
 
-func (s *SmartContract) stateToJson(APIstub shim.ChaincodeStubInterface) (bytes.Buffer, error) {
+func (s *SmartContract) stateToJSON(APIstub shim.ChaincodeStubInterface) (bytes.Buffer, error) {
 	resultsIterator, err := APIstub.GetStateByRange("", "")
 	var buffer bytes.Buffer
 	if err != nil {
@@ -164,13 +167,10 @@ func (s *SmartContract) stateToJson(APIstub shim.ChaincodeStubInterface) (bytes.
 	return buffer, nil
 }
 
-func (s *SmartContract) initLedger(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
+func (s *SmartContract) initVote(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
 	vote := Vote{}
 
-	//TODO: clear state
-
-	for index, party := range args {
-		fmt.Println(index, " is ", party)
+	for _, party := range args {
 		voteAsBytes, _ := json.Marshal(vote)
 		APIstub.PutState(party, voteAsBytes)
 		fmt.Println("Added", party)
