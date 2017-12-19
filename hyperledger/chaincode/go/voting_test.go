@@ -27,10 +27,10 @@ func checkState(t *testing.T, stub *shim.MockStub, name string, value string) {
 	}
 }
 
-func checkQuery(t *testing.T, stub *shim.MockStub, name string, value string) {
-	res := stub.MockInvoke("1", [][]byte{[]byte("query"), []byte(name)})
+func checkQuery(t *testing.T, stub *shim.MockStub, function string, name string, value string) {
+	res := stub.MockInvoke("1", [][]byte{[]byte(function), []byte(name)})
 	if res.Status != shim.OK {
-		fmt.Println("Query", name, "failed", string(res.Message))
+		fmt.Println("Query", function, "with", name, "failed", string(res.Message))
 		t.FailNow()
 	}
 	if res.Payload == nil {
@@ -38,7 +38,7 @@ func checkQuery(t *testing.T, stub *shim.MockStub, name string, value string) {
 		t.FailNow()
 	}
 	if string(res.Payload) != value {
-		fmt.Println("Query value", name, "was not", value, "as expected")
+		fmt.Println("Query value", function, "was not", value, "as expected, but was", string(res.Payload))
 		t.FailNow()
 	}
 }
@@ -51,16 +51,19 @@ func checkInvoke(t *testing.T, stub *shim.MockStub, args [][]byte) {
 	}
 }
 
-func Test_Query(t *testing.T) {
-	scc := new(SimpleChaincode)
+func Test_InitVote(t *testing.T) {
+	scc := new(SmartContract)
 	stub := shim.NewMockStub("ex02", scc)
 
-	// Init A=345 B=456
-	checkInit(t, stub, [][]byte{[]byte("init"), []byte("A"), []byte("345"), []byte("B"), []byte("456")})
+	checkInvoke(t, stub, [][]byte{[]byte("initVote"), []byte("red"), []byte("green")})
+	checkState(t, stub, "red", "{}")
+	checkState(t, stub, "green", "{}")
+	checkQuery(t, stub, "queryOptions", "", "[\"green\",\"red\"]")
+}
 
-	// Query A
-	checkQuery(t, stub, "A", "345")
+func Test_Query(t *testing.T) {
+	scc := new(SmartContract)
+	stub := shim.NewMockStub("ex02", scc)
 
-	// Query B
-	checkQuery(t, stub, "B", "456")
+	checkInit(t, stub, [][]byte{[]byte("init")})
 }
