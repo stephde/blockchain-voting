@@ -26,6 +26,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
@@ -39,8 +40,36 @@ type SmartContract struct {
 }
 
 type Vote struct {
-	count int `json:"count"`
+	count int
 }
+
+type State struct {
+	state StateEnum
+}
+
+type StateEnum int
+
+const (
+	SETUP StateEnum = iota
+	SIGNUP
+	VOTE
+	FINISHED
+)
+
+var states = [...]string{
+	"SETUP",
+	"SIGNUP",
+	"VOTE",
+	"FINISHED",
+}
+
+func (state StateEnum) String() string {
+	return states[state]
+}
+
+/*
+ * Hyperledger Chaincode Interface
+ */
 
 /*
  * The Init method is called when the Smart Contract is instantiated by the blockchain network
@@ -63,8 +92,8 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
 	switch function {
 	case "initVote":
 		return s.initVote(APIstub, args)
-	case "vote":
-		return s.vote(APIstub, args)
+	case "submitVote":
+		return s.submitVote(APIstub, args)
 	case "queryVotes":
 		return s.queryVotes(APIstub)
 	case "queryOptions":
@@ -72,6 +101,73 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
 	default:
 		return shim.Error("Invalid Smart Contract function name.")
 	}
+}
+
+/*
+ * Custom functions
+ */
+
+func (s *SmartContract) computeTally(APIstub shim.ChaincodeStubInterface) sc.Response {
+
+	return shim.Error("Foooo")
+}
+
+func (s *SmartContract) submitVote(stub shim.ChaincodeStubInterface, args []string) sc.Response {
+	if !s.inState(stub, VOTE) {
+		return shim.Error("Wrong state")
+	}
+
+	// get sender address
+	creator, err := stub.GetCreator()
+	publicKey := "SomePublicKey"
+
+	logger.Info("Creator is ", creator)
+	logger.Info("Err is ", err)
+
+	// Make sure the sender can vote and hasn't already voted
+	registered := make(map[string]bool)
+	votecast := make(map[string]bool)
+	GetState(stub, "registered", registered)
+	GetState(stub, "votecast", votecast)
+
+	_, ok1 := registered[publicKey]
+	_, ok2 := votecast[publicKey]
+
+	if ok1 && !ok2 {
+		// User is registered and did not cast vote yet
+		logger.Info("User is allowed to vote")
+	} else {
+		logger.Info("User is not allowed to vote")
+	}
+
+	return shim.Error("Not implemented yet")
+}
+
+func GetState(stub shim.ChaincodeStubInterface, name string, v interface{}) error {
+	bytes, err := stub.GetState(name)
+	if err != nil {
+		return errors.New("Failed to get state")
+	}
+	if bytes == nil {
+		return errors.New("Entity not found")
+	}
+
+	return json.Unmarshal(bytes, &v)
+}
+
+func (s *SmartContract) inState(APIstub shim.ChaincodeStubInterface, expectedState StateEnum) bool {
+	stateAsBytes, _ := APIstub.GetState("state")
+	state := State{}
+
+	json.Unmarshal(stateAsBytes, &state)
+
+	logger.Info("State is " + state.state.String())
+	return expectedState == state.state
+}
+
+// What do these parameters mean???
+func (s *SmartContract) verifyZKP(xG [2]int, r int, vG [3]int) bool {
+	return true
 }
 
 func (s *SmartContract) vote(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
@@ -86,6 +182,8 @@ func (s *SmartContract) vote(APIstub shim.ChaincodeStubInterface, args []string)
 	json.Unmarshal(voteAsBytes, &vote)
 	vote.count = vote.count + 1
 
+	logger.Info("Voted for", args[0], "-", vote)
+
 	voteAsBytes, _ = json.Marshal(vote)
 	APIstub.PutState(args[0], voteAsBytes)
 
@@ -98,6 +196,7 @@ func (s *SmartContract) queryVotes(APIstub shim.ChaincodeStubInterface) sc.Respo
 	if err != nil {
 		return shim.Error(err.Error())
 	}
+	logger.Info("QueryVotes", buffer.String())
 	return shim.Success(buffer.Bytes())
 }
 
@@ -114,7 +213,6 @@ func (s *SmartContract) queryOptions(APIstub shim.ChaincodeStubInterface) sc.Res
 
 	bArrayMemberAlreadyWritten := false
 	for resultsIterator.HasNext() {
-		logger.Info("First for iteration")
 		queryResponse, _ := resultsIterator.Next()
 
 		// Add a comma before array members, suppress it for the first array member
@@ -152,12 +250,12 @@ func (s *SmartContract) stateToJSON(APIstub shim.ChaincodeStubInterface) (bytes.
 		if bArrayMemberAlreadyWritten == true {
 			buffer.WriteString(",")
 		}
-		buffer.WriteString("{\"Key\":")
+		buffer.WriteString("{\"key\":")
 		buffer.WriteString("\"")
 		buffer.WriteString(queryResponse.Key)
 		buffer.WriteString("\"")
 
-		buffer.WriteString(", \"Record\":")
+		buffer.WriteString(", \"value\":")
 		buffer.WriteString(string(queryResponse.Value))
 		buffer.WriteString("}")
 		bArrayMemberAlreadyWritten = true
@@ -168,7 +266,7 @@ func (s *SmartContract) stateToJSON(APIstub shim.ChaincodeStubInterface) (bytes.
 }
 
 func (s *SmartContract) initVote(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
-	vote := Vote{}
+	vote := Vote{0}
 
 	for _, party := range args {
 		voteAsBytes, _ := json.Marshal(vote)
