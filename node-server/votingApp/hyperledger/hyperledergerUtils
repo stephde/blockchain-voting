@@ -2,8 +2,21 @@
 let Fabric = require('fabric-client');
 let path = require('path');
 
-const storePath = path.join(__dirname, 'hfc-key-store');
+/**
+ * @type {{keyStoreName: string, chainCodeId: string, chainId: string}}
+ *
+ * @param chaincodeId
+ *      id of the chaincode as string
+ * @param chainId
+ *      id of the chain / channel as string
+ */
+const hyperledgerConfig = {
+    keyStoreName: 'hfc-key-store',
+    chainCodeId: 'vote',
+    chainId: 'vote'
+}
 
+const storePath = path.join(__dirname, hyperledgerConfig.keyStoreName);
 
 
 let createCryptoKeyStore = function (fabricClient, storePath) {
@@ -41,4 +54,8 @@ exports.createDefaultKeyValueStore = function () {
     return Fabric.newDefaultKeyValueStore({
         path: storePath
     })
+}
+
+exports.getHyperledgerConfig = function () {
+    return hyperledgerConfig;
 }

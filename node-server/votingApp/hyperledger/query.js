@@ -8,8 +8,6 @@ let HyperledgerUtils = require("./hyperledergerUtils");
  *
  * @param fabricClient
  *      already initialized client to execute function on
- * @param chainCodeId
- *      id of the chain which should be queried
  * @param channel
  *      the channel which should be queried
  * @param queryFunc
@@ -19,7 +17,7 @@ let HyperledgerUtils = require("./hyperledergerUtils");
  *
  * @returns {Promise.<TResult>}
  */
-exports.executeQuery = function (fabricClient, channel, chainCodeId, queryFunc, args) {
+exports.executeQuery = function (fabricClient, channel, queryFunc, args) {
     // create the key value store as defined in the fabric-client/config/default.json 'key-value-store' setting
     return HyperledgerUtils.createDefaultKeyValueStore()
     .then((stateStore) => {
@@ -31,12 +29,12 @@ exports.executeQuery = function (fabricClient, channel, chainCodeId, queryFunc, 
 
         return fabricClient.getUserContext("user1", true);
     }).then((userFromStore) => {
-        // queryCar chaincode function - requires 1 argument, ex: args: ['CAR4'],
-        // queryAllCars chaincode function - requires no arguments , ex: args: [''],
+        let chainConfig = HyperledgerUtils.getHyperledgerConfig();
+
         const request = {
             //targets : --- letting this default to the peers assigned to the channel
-            chaincodeId: chainCodeId, //'fabcar',
-            fcn: queryFunc, //'queryAllCars',
+            chaincodeId: chainConfig.chainCodeId,
+            fcn: queryFunc, //'vote',
             args: args //['']
         };
 

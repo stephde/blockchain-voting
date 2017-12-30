@@ -25,7 +25,7 @@ let tx_Id = null;
  *      parameters of the transaction as array of string e.g. ['CAR1', 'user1']
  * @returns {Promise.<TResult>}
  */
-exports.invokeTransaction = function (fabricClient, channel, chaincodeId, transactionFunc, chainId, args) {
+exports.invokeTransaction = function (fabricClient, channel, transactionFunc, args) {
     // create the key value store as defined in the fabric-client/config/default.json 'key-value-store' setting
 
     return HyperledgerUtils.createDefaultKeyValueStore().then((stateStore) => {
@@ -40,7 +40,7 @@ exports.invokeTransaction = function (fabricClient, channel, chaincodeId, transa
     }).then((userFromStore) => {
         if (userFromStore && userFromStore.isEnrolled()) {
       		console.log('Successfully loaded user1 from persistence');
-      		member_user = userFromStore;
+      		let member_user = userFromStore;
       	} else {
       		throw new Error('Failed to get user1.... run registerUser.js');
       	}
@@ -49,15 +49,15 @@ exports.invokeTransaction = function (fabricClient, channel, chaincodeId, transa
         tx_Id = fabricClient.newTransactionID();
         console.log("Assigning transaction_id: ", tx_Id._transaction_id);
 
-        // createCar chaincode function - requires 5 args, ex: args: ['CAR12', 'Honda', 'Accord', 'Black', 'Tom'],
-        // changeCarOwner chaincode function - requires 2 args , ex: args: ['CAR10', 'Barry'],
+        let chainConfig = HyperledgerUtils.getHyperledgerConfig();
+
         // must send the proposal to endorsing peers
         let request = {
             //targets: let default to the peer assigned to the client
-            chaincodeId: chaincodeId, //'fabcar',
+            chaincodeId: chainConfig.chainCodeId, //'vote',
             fcn: transactionFunc, //'',
             args: args, //[''],
-            chainId: chainId, //'mychannel',
+            chainId: chainConfig.chainId, //'vote',
             txId: tx_Id
         };
 
@@ -142,7 +142,7 @@ function sendTransaction(fabricClient, channel, request) {
     // if the transaction did not get committed within the timeout period,
     // report a TIMEOUT status
     let transaction_id_string = tx_Id.getTransactionID(); //Get the transaction ID string to be used by the event processing
-    var promises = [];
+    let promises = [];
 
     let sendPromise = channel.sendTransaction(request);
     promises.push(sendPromise); //we want the send transaction first, so that we know where to check status

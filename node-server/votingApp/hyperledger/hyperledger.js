@@ -9,7 +9,6 @@ Hyperledger = function(){
         hlAdapter,
         channel,
         client,
-        chainCodeId = 'vote',
         _this = this;
 
   const host = 'grpc://localhost:7051';
@@ -22,7 +21,7 @@ Hyperledger = function(){
   }
 
   _this.queryAll = function(){
-    return query.executeQuery(_this.hlAdapter.client, _this.hlAdapter.channel, chainCodeId, 'queryVotes', ['']);
+    return query.executeQuery(_this.hlAdapter.client, _this.hlAdapter.channel, 'queryVotes', ['']);
   }
 
   _this.registerUser = function(user){
@@ -36,13 +35,9 @@ Hyperledger = function(){
   _this.vote = function(selectedOption){
     invoke.invokeTransaction(_this.hlAdapter.client,
       _this.channel,
-      chainCodeId,
       'vote',
-      _this.channel,
       [selectedOption]);
   }
-
-
 
   init();
 }
