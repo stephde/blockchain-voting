@@ -15,17 +15,15 @@ let tx_Id = null;
  *      fabric client to execute transaction on
  * @param channel
  *      actual channel object to invoke transaction on
- * @param chaincodeId
- *      id of the chaincode as string
  * @param transactionFunc
  *      query function identifier as string, which refers to the chaincode method
- * @param chainId
- *      id of the chain / channel as string
  * @param args
  *      parameters of the transaction as array of string e.g. ['CAR1', 'user1']
+ * @param userId
+ *      id of the user who is trying to execute the transaction
  * @returns {Promise.<TResult>}
  */
-exports.invokeTransaction = function (fabricClient, channel, transactionFunc, args) {
+exports.invokeTransaction = function (fabricClient, channel, transactionFunc, args, userId) {
     // create the key value store as defined in the fabric-client/config/default.json 'key-value-store' setting
 
     return HyperledgerUtils.createDefaultKeyValueStore().then((stateStore) => {
@@ -36,7 +34,7 @@ exports.invokeTransaction = function (fabricClient, channel, transactionFunc, ar
         HyperledgerUtils.createDefaultCryptoKeyStore(fabricClient);
 
         // TODO replace string
-        return fabricClient.getUserContext("user1", true);
+        return fabricClient.getUserContext(userId, true);
     }).then((userFromStore) => {
         if (userFromStore && userFromStore.isEnrolled()) {
       		console.log('Successfully loaded user1 from persistence');
@@ -45,24 +43,8 @@ exports.invokeTransaction = function (fabricClient, channel, transactionFunc, ar
       		throw new Error('Failed to get user1.... run registerUser.js');
       	}
 
-        // get a transaction id object based on the current user assigned to fabric client
-        tx_Id = fabricClient.newTransactionID();
-        console.log("Assigning transaction_id: ", tx_Id._transaction_id);
-
-        let chainConfig = HyperledgerUtils.getHyperledgerConfig();
-
-        // must send the proposal to endorsing peers
-        let request = {
-            //targets: let default to the peer assigned to the client
-            chaincodeId: chainConfig.chainCodeId, //'vote',
-            fcn: transactionFunc, //'',
-            args: args, //[''],
-            chainId: chainConfig.chainId, //'vote',
-            txId: tx_Id
-        };
-
         // send the transaction proposal to the peers
-        return proposeTransaction(fabricClient, channel, userFromStore, request);
+        return proposeTransaction(fabricClient, channel, transactionFunc, args);
     }).then((results) => {
         let proposalResponses = results[0];
         let proposal = results[1];
@@ -87,12 +69,23 @@ exports.invokeTransaction = function (fabricClient, channel, transactionFunc, ar
 
 // -------------------- private functions --------------------- //
 
-function proposeTransaction(fabricClient, channel, userFromStore, request) {
-    if (userFromStore && userFromStore.isEnrolled()) {
-        console.log('Successfully loaded user1 from persistence');
-    } else {
-        throw new Error('Failed to get user1.... run registerUser.js');
-    }
+function proposeTransaction(fabricClient, channel, transactionFunc, args) {
+    // get a transaction id object based on the current user assigned to fabric client
+    tx_Id = fabricClient.newTransactionID();
+    console.log("Assigning transaction_id: ", tx_Id._transaction_id);
+
+    let chainConfig = HyperledgerUtils.getHyperledgerConfig();
+
+    // must send the proposal to endorsing peers
+    let request = {
+        //targets: let default to the peer assigned to the client
+        chaincodeId: chainConfig.chainCodeId, //'vote',
+        fcn: transactionFunc, //'',
+        args: args, //[''],
+        chainId: chainConfig.chainId, //'vote',
+        txId: tx_Id
+    };
+
     console.log(request);
     // send the transaction proposal to the peers
     return channel.sendTransactionProposal(request);
@@ -118,16 +111,12 @@ function handleResponse(response) {
 
 function checkProposalResponse(proposalResponses) {
     let isProposalGood = false;
-    if (proposalResponses && proposalResponses[0].response &&
-        proposalResponses[0].response.status === 200) {
+    if (proposalResponses && proposalResponses[0].response && proposalResponses[0].response.status === 200) {
         isProposalGood = true;
-        console.log('Transaction proposal was good');
 
         console.log(util.format(
             'Successfully sent Proposal and received ProposalResponse: Status - %s, message - "%s"',
             proposalResponses[0].response.status, proposalResponses[0].response.message));
-    } else {
-        console.error('Transaction proposal was bad');
     }
 
     if( ! isProposalGood) {

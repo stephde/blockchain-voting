@@ -14,10 +14,12 @@ let HyperledgerUtils = require("./hyperledergerUtils");
  *      query function identifier as string, which refers to the chaincode method
  * @param args
  *      arguments for the query
+ * @param userId
+ *      id of the user who is trying to execute the query
  *
  * @returns {Promise.<TResult>}
  */
-exports.executeQuery = function (fabricClient, channel, queryFunc, args) {
+exports.executeQuery = function (fabricClient, channel, queryFunc, args, userId) {
     // create the key value store as defined in the fabric-client/config/default.json 'key-value-store' setting
     return HyperledgerUtils.createDefaultKeyValueStore()
     .then((stateStore) => {
@@ -27,7 +29,7 @@ exports.executeQuery = function (fabricClient, channel, queryFunc, args) {
         // creates the default cryptoStore and adds it to the client
         HyperledgerUtils.createDefaultCryptoKeyStore(fabricClient);
 
-        return fabricClient.getUserContext("user1", true);
+        return fabricClient.getUserContext(userId, true);
     }).then((userFromStore) => {
         let chainConfig = HyperledgerUtils.getHyperledgerConfig();
 
