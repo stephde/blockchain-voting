@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -22,7 +23,7 @@ func checkState(t *testing.T, stub *shim.MockStub, name string, value string) {
 		t.FailNow()
 	}
 	if string(bytes) != value {
-		fmt.Println("State value", name, "was not", value, "as expected")
+		fmt.Println("State value", name, "was not", value, "as expected, but was", string(bytes))
 		t.FailNow()
 	}
 }
@@ -51,19 +52,35 @@ func checkInvoke(t *testing.T, stub *shim.MockStub, args [][]byte) {
 	}
 }
 
-func Test_InitVote(t *testing.T) {
+// func Test_InitVote(t *testing.T) {
+// 	scc := new(SmartContract)
+// 	stub := shim.NewMockStub("test_initVote", scc)
+//
+// 	checkInvoke(t, stub, [][]byte{[]byte("initVote"), []byte("red"), []byte("green")})
+// 	checkState(t, stub, "red", "{0}")
+// 	checkState(t, stub, "green", "{0}")
+// 	checkQuery(t, stub, "queryOptions", "", "[\"green\",\"red\"]")
+// }
+
+// func Test_Vote(t *testing.T) {
+// 	scc := new(SmartContract)
+// 	stub := shim.NewMockStub("test_vote", scc)
+//
+// 	checkInvoke(t, stub, [][]byte{[]byte("initVote"), []byte("red"), []byte("green")})
+// 	checkInvoke(t, stub, [][]byte{[]byte("vote"), []byte("red")})
+// 	checkState(t, stub, "red", "{1}")
+// 	checkState(t, stub, "green", "{}")
+// 	checkQuery(t, stub, "queryVotes", "", "[{key:\"green\",value:{0},{key:\"red\",value:{1}]")
+// }
+
+func Test_SubmitVote(t *testing.T) {
 	scc := new(SmartContract)
-	stub := shim.NewMockStub("ex02", scc)
+	stub := shim.NewMockStub("test_submitVote", scc)
 
-	checkInvoke(t, stub, [][]byte{[]byte("initVote"), []byte("red"), []byte("green")})
-	checkState(t, stub, "red", "{}")
-	checkState(t, stub, "green", "{}")
-	checkQuery(t, stub, "queryOptions", "", "[\"green\",\"red\"]")
-}
+	stub.MockTransactionStart("t123")
+	stateAsBytes, _ := json.Marshal(VOTE)
+	stub.PutState("state", stateAsBytes)
+	stub.MockTransactionEnd("t123")
 
-func Test_Query(t *testing.T) {
-	scc := new(SmartContract)
-	stub := shim.NewMockStub("ex02", scc)
-
-	checkInit(t, stub, [][]byte{[]byte("init")})
+	checkInvoke(t, stub, [][]byte{[]byte("submitVote"), []byte("")})
 }
