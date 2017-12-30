@@ -7,7 +7,7 @@ let fabric_ca_client = null;
 let admin_user = null;
 
 exports.enrollAdmin = function(fabric_client){
-  HyperledgerUtils.createDefaultKeyValueStore().then((state_store) => {
+  return HyperledgerUtils.createDefaultKeyValueStore().then((state_store) => {
       // assign the store to the fabric client
       fabric_client.setStateStore(state_store);
       let crypto_suite = HyperledgerUtils.createDefaultCryptoKeyStore(fabric_client);

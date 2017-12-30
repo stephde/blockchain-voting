@@ -24,15 +24,20 @@ Hyperledger = function(){
     return query.executeQuery(_this.hlAdapter.client, _this.hlAdapter.channel, 'queryVotes', [''], defaultUserId);
   }
 
-  _this.registerUser = function(user){
-    registration.registerUser(_this.client, user);
+  _this.registerUser = function(user) {
+    return registration.registerUser(_this.client, user.id);
   }
 
-  _this.enrollAdmin = function(){
-    enroll.enrollAdmin(_this.client);
+  _this.getUser = function (userId) {
+    //ToDo: actually get user
+    return new Promise((resolve, reject) => resolve({id: userId}));
   }
 
-  _this.vote = function(selectedOption){
+  _this.enrollAdmin = function() {
+    return enroll.enrollAdmin(_this.client);
+  }
+
+  _this.vote = function(selectedOption) {
     invoke.invokeTransaction(_this.hlAdapter.client,
       _this.channel,
       'vote', //transaction function

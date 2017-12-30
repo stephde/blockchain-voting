@@ -21,7 +21,7 @@ let member_user = null;
  */
 
 exports.registerUser = function (fabric_client, username) {
-    HyperledgerUtils.createDefaultKeyValueStore().then((state_store) => {
+    return HyperledgerUtils.createDefaultKeyValueStore().then((state_store) => {
         // assign the store to the fabric client
         fabric_client.setStateStore(state_store);
         let crypto_suite = HyperledgerUtils.createDefaultCryptoKeyStore(fabric_client);
@@ -42,6 +42,7 @@ exports.registerUser = function (fabric_client, username) {
             throw new Error('Failed to get admin.... run enrollAdmin.js');
         }
 
+        console.log("Trying to register user with id - " + username);
         // at this point we should have the admin user
         // first need to register the user with the CA server
         return fabric_ca_client.register({
@@ -62,12 +63,11 @@ exports.registerUser = function (fabric_client, username) {
             cryptoContent: {privateKeyPEM: enrollment.key.toBytes(), signedCertPEM: enrollment.certificate}
         });
     }).then((user) => {
-        member_user = user;
-
-        return fabric_client.setUserContext(member_user);
-    }).then(() => {
+        return fabric_client.setUserContext(user);
+    }).then((userContext) => {
         console.log('User1 was successfully registered and enrolled and is ready to intreact with the fabric network');
 
+        return userContext;
     }).catch((err) => {
         console.error('Failed to register: ' + err);
         if (err.toString().indexOf('Authorization') > -1) {
