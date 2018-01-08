@@ -25,6 +25,7 @@ package main
  */
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	sc "github.com/hyperledger/fabric/protos/peer"
@@ -101,10 +102,11 @@ func (s *SmartContract) register(stub shim.ChaincodeStubInterface, args []string
 	}
 
 	// TODO: what do these names mean?
+	// TODO: error handling
 	userId := args[0]
-	xG := args[1]
-	vG := args[2]
-	r := args[3]
+	xG, _ := strconv.Atoi(args[1])
+	vG, _ := strconv.Atoi(args[2])
+	r, _ := strconv.Atoi(args[3])
 
 	var eligible map[string]bool
 	GetState(stub, "eligible", &eligible)
@@ -115,23 +117,14 @@ func (s *SmartContract) register(stub shim.ChaincodeStubInterface, args []string
 	isEligible := eligible[userId]
 	isRegistered := registered[userId]
 
-	if isEligible && !isRegistered && s.verifyZKPString(xG, r, vG) {
+	if isEligible && !isRegistered && s.verifyZKP(xG, r, vG) {
+		registered[userId] = true
+		PutState(stub, "registered", registered)
 
+		voter := Voter{userId, xG, nil, nil}
 	}
 
 	return shim.Error("not implemented yet")
-}
-
-func (s *SmartContract) beginSignUp(stub shim.ChaincodeStubInterface, args []string) sc.Response {
-	if !s.inState(stub, SETUP) {
-		return shim.Error("Wrong state")
-	}
-
-	question := args[0]
-	PutState(stub, "question", question)
-	s.transitionToState(stub, SIGNUP)
-
-	return shim.Success(nil)
 }
 
 func (s *SmartContract) computeTally(APIstub shim.ChaincodeStubInterface) sc.Response {
