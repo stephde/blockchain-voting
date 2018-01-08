@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -78,9 +77,19 @@ func Test_SubmitVote(t *testing.T) {
 	stub := shim.NewMockStub("test_submitVote", scc)
 
 	stub.MockTransactionStart("t123")
-	stateAsBytes, _ := json.Marshal(VOTE)
-	stub.PutState("state", stateAsBytes)
+	PutState(stub, "state", VOTE)
 	stub.MockTransactionEnd("t123")
 
-	checkInvoke(t, stub, [][]byte{[]byte("submitVote"), []byte("")})
+	userId := "1"
+	stub.MockTransactionStart("t124")
+	registered := map[string]bool{userId: true}
+	PutState(stub, "registered", registered)
+	stub.MockTransactionEnd("t124")
+
+	stub.MockTransactionStart("t125")
+	votecast := map[string]bool{userId: false}
+	PutState(stub, "votecast", votecast)
+	stub.MockTransactionEnd("t125")
+
+	checkInvoke(t, stub, [][]byte{[]byte("submitVote"), []byte(userId)})
 }
