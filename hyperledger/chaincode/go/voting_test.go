@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
+	"github.com/stretchr/testify/assert"
 )
 
 func checkInit(t *testing.T, stub *shim.MockStub, args [][]byte) {
@@ -71,6 +72,60 @@ func checkInvoke(t *testing.T, stub *shim.MockStub, args [][]byte) {
 // 	checkState(t, stub, "green", "{}")
 // 	checkQuery(t, stub, "queryVotes", "", "[{key:\"green\",value:{0},{key:\"red\",value:{1}]")
 // }
+
+func Test_SetEligible(t *testing.T) {
+	scc := new(SmartContract)
+	stub := shim.NewMockStub("test_beginSignup", scc)
+
+	checkInvoke(t, stub, [][]byte{
+		[]byte("setEligible"),
+		[]byte("a"),
+		[]byte("b"),
+		[]byte("c"),
+	})
+
+	var eligible map[string]bool
+	var totalEligible int
+	GetState(stub, "eligible", &eligible)
+	GetState(stub, "totalEligible", &totalEligible)
+
+	assert.Equal(t, 3, totalEligible)
+
+	assert.True(t, eligible["a"])
+	assert.True(t, eligible["b"])
+	assert.True(t, eligible["c"])
+
+}
+
+func Test_InitVote(t *testing.T) {
+	scc := new(SmartContract)
+	stub := shim.NewMockStub("test_beginSignup", scc)
+
+	checkInvoke(t, stub, [][]byte{[]byte("initVote")})
+
+	var state StateEnum
+	GetState(stub, "state", &state)
+	assert.Equal(t, SETUP, state)
+}
+
+func Test_BeginSignup(t *testing.T) {
+	scc := new(SmartContract)
+	stub := shim.NewMockStub("test_beginSignup", scc)
+
+	stub.MockTransactionStart("t123")
+	PutState(stub, "state", SETUP)
+	stub.MockTransactionEnd("t123")
+
+	checkInvoke(t, stub, [][]byte{[]byte("beginSignUp"), []byte("This is a question!")})
+
+	var state StateEnum
+	GetState(stub, "state", &state)
+	assert.Equal(t, SIGNUP, state)
+
+	var question string
+	GetState(stub, "question", &question)
+	assert.Equal(t, "This is a question!", question)
+}
 
 func Test_SubmitVote(t *testing.T) {
 	scc := new(SmartContract)

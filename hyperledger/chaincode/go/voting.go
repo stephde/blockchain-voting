@@ -24,6 +24,7 @@ package main
  * 2 specific Hyperledger Fabric specific libraries for Smart Contracts
  */
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -39,9 +40,20 @@ type SmartContract struct {
 
 type Voter struct {
 	address          string
-	registeredKey    [2]int
+	registeredKey    XG
 	reconstructedKey [2]int
 	vote             [2]int
+}
+
+type XG struct {
+	xG1 int
+	xG2 int
+}
+
+type VG struct {
+	vG1 int
+	vG2 int
+	vG3 int
 }
 
 // TODO: get from store
@@ -103,10 +115,14 @@ func (s *SmartContract) register(stub shim.ChaincodeStubInterface, args []string
 
 	// TODO: what do these names mean?
 	// TODO: error handling
+
+	var xG XG
+	var vG VG
+
 	userId := args[0]
-	xG, _ := strconv.Atoi(args[1])
-	vG, _ := strconv.Atoi(args[2])
-	r, _ := strconv.Atoi(args[3])
+	json.Unmarshal([]byte(args[1]), &xG)
+	json.Unmarshal([]byte(args[2]), &vG)
+	r, _ := strconv.Atoi(args[6])
 
 	var eligible map[string]bool
 	GetState(stub, "eligible", &eligible)
@@ -121,14 +137,28 @@ func (s *SmartContract) register(stub shim.ChaincodeStubInterface, args []string
 		registered[userId] = true
 		PutState(stub, "registered", registered)
 
-		voter := Voter{userId, xG, nil, nil}
+		// voter := Voter{userId, xG, {}, {}}
+
+		var totalRegistered int
+		GetState(stub, "totalRegistered", &totalRegistered)
+		totalRegistered = totalRegistered + 1
+		PutState(stub, "totalRegistered", totalRegistered)
 	}
 
 	return shim.Error("not implemented yet")
 }
 
-func (s *SmartContract) computeTally(APIstub shim.ChaincodeStubInterface) sc.Response {
+func (s *SmartContract) computeTally(stub shim.ChaincodeStubInterface) sc.Response {
+
+	var totalRegistered int
+	GetState(stub, "totalregistered", &totalRegistered)
+
+	// for (i := 0; i < totalRegistered; i++) {
+	// TODO: confirm that all votes have been cast...
+	// }
+
 	return shim.Error("Not implemented yet")
+
 }
 
 // What do these parameters mean???
@@ -137,7 +167,8 @@ func (s *SmartContract) verifyZKPString(xG string, r string, vG string) bool {
 	return true
 }
 
-func (s *SmartContract) verifyZKP(xG [2]int, r int, vG [3]int) bool {
+// What do these parameters mean???
+func (s *SmartContract) verifyZKP(xG XG, r int, vG VG) bool {
 	return true
 }
 
