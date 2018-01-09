@@ -95,6 +95,8 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
 		return s.setEligible(APIstub, args)
 	case "register":
 		return s.register(APIstub, args)
+	case "computeTally":
+		return s.computeTally(APIstub)
 	default:
 		return shim.Error("Invalid Smart Contract function name.")
 	}
@@ -119,10 +121,10 @@ func (s *SmartContract) register(stub shim.ChaincodeStubInterface, args []string
 	var xG XG
 	var vG VG
 
-	userId := args[0]
+	userID := args[0]
 	json.Unmarshal([]byte(args[1]), &xG)
 	json.Unmarshal([]byte(args[2]), &vG)
-	r, _ := strconv.Atoi(args[6])
+	r, _ := strconv.Atoi(args[3])
 
 	var eligible map[string]bool
 	GetState(stub, "eligible", &eligible)
@@ -130,14 +132,14 @@ func (s *SmartContract) register(stub shim.ChaincodeStubInterface, args []string
 	var registered map[string]bool
 	GetState(stub, "registered", &registered)
 
-	isEligible := eligible[userId]
-	isRegistered := registered[userId]
+	isEligible := eligible[userID]
+	isRegistered := registered[userID]
 
 	if isEligible && !isRegistered && s.verifyZKP(xG, r, vG) {
-		registered[userId] = true
+		registered[userID] = true
 		PutState(stub, "registered", registered)
 
-		// voter := Voter{userId, xG, {}, {}}
+		// voter := Voter{userID, xG, {}, {}}
 
 		var totalRegistered int
 		GetState(stub, "totalRegistered", &totalRegistered)
@@ -145,7 +147,7 @@ func (s *SmartContract) register(stub shim.ChaincodeStubInterface, args []string
 		PutState(stub, "totalRegistered", totalRegistered)
 	}
 
-	return shim.Error("not implemented yet")
+	return shim.Success(nil)
 }
 
 func (s *SmartContract) computeTally(stub shim.ChaincodeStubInterface) sc.Response {

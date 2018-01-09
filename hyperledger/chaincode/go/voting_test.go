@@ -73,9 +73,50 @@ func checkInvoke(t *testing.T, stub *shim.MockStub, args [][]byte) {
 // 	checkQuery(t, stub, "queryVotes", "", "[{key:\"green\",value:{0},{key:\"red\",value:{1}]")
 // }
 
+func Test_ComputeTally(t *testing.T) {
+	scc := new(SmartContract)
+	stub := shim.NewMockStub("test_computeTally", scc)
+
+	stub.MockTransactionStart("t123")
+	PutState(stub, "state", VOTE)
+	stub.MockTransactionEnd("t123")
+
+	checkInvoke(t, stub, [][]byte{[]byte("computeTally")})
+}
+
+func Test_Register(t *testing.T) {
+	scc := new(SmartContract)
+	stub := shim.NewMockStub("test_register", scc)
+
+	stub.MockTransactionStart("t123")
+	PutState(stub, "state", SIGNUP)
+	eligible := map[string]bool{"userId": true}
+	PutState(stub, "eligible", eligible)
+	registered := map[string]bool{"userId": false}
+	PutState(stub, "registered", registered)
+	stub.MockTransactionEnd("t124")
+
+	checkInvoke(t, stub, [][]byte{
+		[]byte("register"),
+		[]byte("userId"),
+		[]byte(""),
+		[]byte(""),
+		[]byte(""),
+	})
+
+	var totalRegistered int
+	GetState(stub, "totalRegistered", &totalRegistered)
+	assert.Equal(t, 1, totalRegistered)
+
+	GetState(stub, "registered", &registered)
+	assert.True(t, registered["userId"])
+
+	// TODO: verify that voter was storede
+}
+
 func Test_SetEligible(t *testing.T) {
 	scc := new(SmartContract)
-	stub := shim.NewMockStub("test_beginSignup", scc)
+	stub := shim.NewMockStub("test_setEligible", scc)
 
 	checkInvoke(t, stub, [][]byte{
 		[]byte("setEligible"),
@@ -94,7 +135,6 @@ func Test_SetEligible(t *testing.T) {
 	assert.True(t, eligible["a"])
 	assert.True(t, eligible["b"])
 	assert.True(t, eligible["c"])
-
 }
 
 func Test_InitVote(t *testing.T) {
