@@ -24,11 +24,9 @@ package main
  * 2 specific Hyperledger Fabric specific libraries for Smart Contracts
  */
 import (
-	"crypto/sha256"
 	"fmt"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	sc "github.com/hyperledger/fabric/protos/peer"
 )
@@ -41,20 +39,9 @@ type SmartContract struct {
 
 type Voter struct {
 	address          string
-	registeredKey    XG
-	reconstructedKey [2]int
+	registeredKey    []big.Int
+	reconstructedKey []big.Int
 	vote             [2]int
-}
-
-type XG struct {
-	xG1 int
-	xG2 int
-}
-
-type VG struct {
-	vG1 int
-	vG2 int
-	vG3 int
 }
 
 // TODO: get from store
@@ -118,45 +105,6 @@ func (s *SmartContract) computeTally(stub shim.ChaincodeStubInterface) sc.Respon
 
 	return shim.Error("Not implemented yet")
 
-}
-
-// What do these parameters mean???
-func (s *SmartContract) verifyZKP(userID string, xG []big.Int, r big.Int, vG []big.Int) bool {
-
-	bitCurve := crypto.S256()
-	isOnCurve := bitCurve.IsOnCurve(&xG[0], &xG[1])
-
-	// Reference implementation is ignoring vG[2] as well
-	if !bitCurve.IsOnCurve(&xG[0], &xG[1]) || !bitCurve.IsOnCurve(&vG[0], &vG[1]) {
-		return false
-	}
-
-	/*
-			 * Get c = H(g, g^{x}, g^{v});
-		   * bytes32 b_c = sha256(msg.sender, Gx, Gy, xG, vG);
-	*/
-	Gx := bitCurve.Params().Gx
-	Gy := bitCurve.Params().Gy
-	data := append([]byte(userID)[:], append(Gx.Bytes()[:], append(Gy.Bytes()[:], append(xG[0].Bytes()[:], xG[1].Bytes()[:]...)...)...)...)
-	hashBytes := sha256.Sum256(data)
-	c := new(big.Int)
-	c.SetBytes(hashBytes[:])
-
-	// Get g^{r}, and g^{xc}
-	rGX, rGY := bitCurve.ScalarMult(Gx, Gy, r.Bytes())
-	xcGX, xcGY := bitCurve.ScalarMult(&xG[0], &xG[1], c.Bytes())
-
-	// Add both points together
-	rGxcGX, rGxcGY := bitCurve.Add(rGX, rGY, xcGX, xcGY)
-
-	logger.Info(isOnCurve)
-
-	// reflect.DeepEqual(*rGxcGx, vg[0])
-	if rGxcGX.Cmp(&vG[0]) == 0 && rGxcGY.Cmp(&vG[1]) == 0 {
-		return true
-	} else {
-		return false
-	}
 }
 
 // The main function is only relevant in unit test mode. Only included here for completeness.
