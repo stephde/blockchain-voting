@@ -1,9 +1,15 @@
 package main
 
 import (
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
 	"fmt"
+	"math/big"
 	"testing"
 
+	"github.com/ethereum/go-ethereum/common/math"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	"github.com/stretchr/testify/assert"
 )
@@ -73,6 +79,30 @@ func checkInvoke(t *testing.T, stub *shim.MockStub, args [][]byte) {
 // 	checkQuery(t, stub, "queryVotes", "", "[{key:\"green\",value:{0},{key:\"red\",value:{1}]")
 // }
 
+// from secp256k1.
+func generateKeyPair() (pubkey, privkey []byte) {
+	key, err := ecdsa.GenerateKey(crypto.S256(), rand.Reader)
+	if err != nil {
+		panic(err)
+	}
+	pubkey = elliptic.Marshal(crypto.S256(), key.X, key.Y)
+	return pubkey, math.PaddedBigBytes(key.D, 32)
+}
+
+func Test_verifyZKP(t *testing.T) {
+	publicKey, privateKey := generateKeyPair()
+	userID := ""
+
+	xGx := new(big.Int).SetBytes(publicKey[0:31])
+	xGy := new(big.Int).SetBytes(publicKey[32:63])
+	xG := []big.Int{*xGx, *xGy}
+	r := big.NewInt(3)
+	vG := []big.Int{3, 4, 5}
+
+	scc := new(SmartContract)
+	assert.True(t, scc.verifyZKP(userID, xG, *r, vG))
+}
+
 func Test_ComputeTally(t *testing.T) {
 	scc := new(SmartContract)
 	stub := shim.NewMockStub("test_computeTally", scc)
@@ -99,9 +129,9 @@ func Test_Register(t *testing.T) {
 	checkInvoke(t, stub, [][]byte{
 		[]byte("register"),
 		[]byte("userId"),
-		[]byte(""),
-		[]byte(""),
-		[]byte(""),
+		[]byte("[1, 2]"),
+		[]byte("[1, 2, 3]"),
+		[]byte("1"),
 	})
 
 	var totalRegistered int

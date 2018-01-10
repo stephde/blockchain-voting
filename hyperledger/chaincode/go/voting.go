@@ -24,10 +24,11 @@ package main
  * 2 specific Hyperledger Fabric specific libraries for Smart Contracts
  */
 import (
-	"encoding/json"
+	"crypto/sha256"
 	"fmt"
-	"strconv"
+	"math/big"
 
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	sc "github.com/hyperledger/fabric/protos/peer"
 )
@@ -106,50 +107,6 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
  * Custom functions
  */
 
-func (s *SmartContract) register(stub shim.ChaincodeStubInterface, args []string) sc.Response {
-	if !s.inState(stub, SIGNUP) {
-		return shim.Error("Wrong state")
-	}
-
-	if len(args) != 4 {
-		return shim.Error("Wrong number of arguments, expected 4")
-	}
-
-	// TODO: what do these names mean?
-	// TODO: error handling
-
-	var xG XG
-	var vG VG
-
-	userID := args[0]
-	json.Unmarshal([]byte(args[1]), &xG)
-	json.Unmarshal([]byte(args[2]), &vG)
-	r, _ := strconv.Atoi(args[3])
-
-	var eligible map[string]bool
-	GetState(stub, "eligible", &eligible)
-
-	var registered map[string]bool
-	GetState(stub, "registered", &registered)
-
-	isEligible := eligible[userID]
-	isRegistered := registered[userID]
-
-	if isEligible && !isRegistered && s.verifyZKP(xG, r, vG) {
-		registered[userID] = true
-		PutState(stub, "registered", registered)
-
-		// voter := Voter{userID, xG, {}, {}}
-
-		var totalRegistered int
-		GetState(stub, "totalRegistered", &totalRegistered)
-		totalRegistered = totalRegistered + 1
-		PutState(stub, "totalRegistered", totalRegistered)
-	}
-
-	return shim.Success(nil)
-}
-
 func (s *SmartContract) computeTally(stub shim.ChaincodeStubInterface) sc.Response {
 
 	var totalRegistered int
@@ -164,110 +121,43 @@ func (s *SmartContract) computeTally(stub shim.ChaincodeStubInterface) sc.Respon
 }
 
 // What do these parameters mean???
-func (s *SmartContract) verifyZKPString(xG string, r string, vG string) bool {
-	// xG [2]int, r int, vG [3]int
-	return true
+func (s *SmartContract) verifyZKP(userID string, xG []big.Int, r big.Int, vG []big.Int) bool {
+
+	bitCurve := crypto.S256()
+	isOnCurve := bitCurve.IsOnCurve(&xG[0], &xG[1])
+
+	// Reference implementation is ignoring vG[2] as well
+	if !bitCurve.IsOnCurve(&xG[0], &xG[1]) || !bitCurve.IsOnCurve(&vG[0], &vG[1]) {
+		return false
+	}
+
+	/*
+			 * Get c = H(g, g^{x}, g^{v});
+		   * bytes32 b_c = sha256(msg.sender, Gx, Gy, xG, vG);
+	*/
+	Gx := bitCurve.Params().Gx
+	Gy := bitCurve.Params().Gy
+	data := append([]byte(userID)[:], append(Gx.Bytes()[:], append(Gy.Bytes()[:], append(xG[0].Bytes()[:], xG[1].Bytes()[:]...)...)...)...)
+	hashBytes := sha256.Sum256(data)
+	c := new(big.Int)
+	c.SetBytes(hashBytes[:])
+
+	// Get g^{r}, and g^{xc}
+	rGX, rGY := bitCurve.ScalarMult(Gx, Gy, r.Bytes())
+	xcGX, xcGY := bitCurve.ScalarMult(&xG[0], &xG[1], c.Bytes())
+
+	// Add both points together
+	rGxcGX, rGxcGY := bitCurve.Add(rGX, rGY, xcGX, xcGY)
+
+	logger.Info(isOnCurve)
+
+	// reflect.DeepEqual(*rGxcGx, vg[0])
+	if rGxcGX.Cmp(&vG[0]) == 0 && rGxcGY.Cmp(&vG[1]) == 0 {
+		return true
+	} else {
+		return false
+	}
 }
-
-// What do these parameters mean???
-func (s *SmartContract) verifyZKP(xG XG, r int, vG VG) bool {
-	return true
-}
-
-// func (s *SmartContract) vote(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
-//
-// 	if len(args) != 1 {
-// 		return shim.Error("Incorrect number of arguments. Expecting 1")
-// 	}
-//
-// 	voteAsBytes, _ := APIstub.GetState(args[0])
-// 	vote := Vote{}
-//
-// 	json.Unmarshal(voteAsBytes, &vote)
-// 	vote.count = vote.count + 1
-//
-// 	logger.Info("Voted for", args[0], "-", vote)
-//
-// 	voteAsBytes, _ = json.Marshal(vote)
-// 	APIstub.PutState(args[0], voteAsBytes)
-//
-// 	return shim.Success(nil)
-// }
-
-// func (s *SmartContract) queryVotes(APIstub shim.ChaincodeStubInterface) sc.Response {
-// 	// buffer is a JSON array containing QueryResults
-// 	buffer, err := s.stateToJSON(APIstub)
-// 	if err != nil {
-// 		return shim.Error(err.Error())
-// 	}
-// 	logger.Info("QueryVotes", buffer.String())
-// 	return shim.Success(buffer.Bytes())
-// }
-//
-// func (s *SmartContract) queryOptions(APIstub shim.ChaincodeStubInterface) sc.Response {
-// 	resultsIterator, err := APIstub.GetStateByRange("", "")
-// 	if err != nil {
-// 		return shim.Error(err.Error())
-// 	}
-// 	defer resultsIterator.Close()
-//
-// 	// buffer is a JSON array containing QueryResults
-// 	var buffer bytes.Buffer
-// 	buffer.WriteString("[")
-//
-// 	bArrayMemberAlreadyWritten := false
-// 	for resultsIterator.HasNext() {
-// 		queryResponse, _ := resultsIterator.Next()
-//
-// 		// Add a comma before array members, suppress it for the first array member
-// 		if bArrayMemberAlreadyWritten == true {
-// 			buffer.WriteString(",")
-// 		}
-// 		buffer.WriteString("\"")
-// 		buffer.WriteString(queryResponse.Key)
-// 		buffer.WriteString("\"")
-// 		bArrayMemberAlreadyWritten = true
-// 	}
-// 	buffer.WriteString("]")
-//
-// 	logger.Info(buffer.String())
-//
-// 	return shim.Success(buffer.Bytes())
-// }
-
-// func (s *SmartContract) stateToJSON(APIstub shim.ChaincodeStubInterface) (bytes.Buffer, error) {
-// 	resultsIterator, err := APIstub.GetStateByRange("", "")
-// 	var buffer bytes.Buffer
-// 	if err != nil {
-// 		return buffer, err
-// 	}
-// 	defer resultsIterator.Close()
-//
-// 	// buffer is a JSON array containing QueryResults
-// 	buffer.WriteString("[")
-//
-// 	bArrayMemberAlreadyWritten := false
-// 	for resultsIterator.HasNext() {
-// 		queryResponse, _ := resultsIterator.Next()
-//
-// 		// Add a comma before array members, suppress it for the first array member
-// 		if bArrayMemberAlreadyWritten == true {
-// 			buffer.WriteString(",")
-// 		}
-// 		buffer.WriteString("{\"key\":")
-// 		buffer.WriteString("\"")
-// 		buffer.WriteString(queryResponse.Key)
-// 		buffer.WriteString("\"")
-//
-// 		buffer.WriteString(", \"value\":")
-// 		buffer.WriteString(string(queryResponse.Value))
-// 		buffer.WriteString("}")
-// 		bArrayMemberAlreadyWritten = true
-// 	}
-// 	buffer.WriteString("]")
-//
-// 	return buffer, nil
-// }
 
 // The main function is only relevant in unit test mode. Only included here for completeness.
 func main() {
