@@ -10,24 +10,17 @@ const users = ["user1", "user2", "user3"]
 function run() {
     hyperledger = new Hyperledger();
 
-    //ToDo: handle async code execution properly
-
-    let userId;
-    for(userId in users) {
-        hyperledger.registerUser({id: userId})
-    }
-
-    hyperledger.initVote();
-    hyperledger.setEligible(users)
-    hyperledger.beginSignUp("Do you like Blockchain?")
-
-    for(userId in users) {
-        hyperledger.registerForVote(userId)
-    }
-
-    hyperledger
-        .computeTally()
-        .then(console.log, console.log);
+    hyperledger.registerUser({id: users[0]})
+        .then(() => hyperledger.registerUser({id: users[1]}))
+        .then(() => hyperledger.registerUser({id: users[2]}))
+        .then(() => hyperledger.initVote())
+        .then(() => hyperledger.setEligible(users))
+        .then(() => hyperledger.beginSignUp("Do you like Blockchain?"))
+        .then(() => hyperledger.registerForVote(users[0]))
+        .then(() => hyperledger.registerForVote(users[1]))
+        .then(() => hyperledger.registerForVote(users[2]))
+        .then(() => hyperledger.computeTally())
+        .then(console.log, console.log)
 }
 
 run();

@@ -66,7 +66,6 @@ Hyperledger = function(){
       return invoke.invokeTransaction(_this.client, _this.channel, 'computeTally', [])
   }
 
-
   _this.vote = function(selectedOption) {
     invoke.invokeTransaction(_this.client,
       _this.channel,
@@ -74,8 +73,6 @@ Hyperledger = function(){
       [selectedOption],
       defaultUserId);
   }
-
-
 
   init();
 }
