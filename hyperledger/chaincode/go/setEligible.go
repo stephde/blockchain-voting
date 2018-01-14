@@ -7,6 +7,11 @@ import (
 
 func (s *SmartContract) setEligible(stub shim.ChaincodeStubInterface, args []string) sc.Response {
 
+	//ToDo: Should we verify here, that the state is SETUP?
+	if !s.inState(stub, SETUP) {
+		return shim.Error("Wrong state")
+	}
+
 	// TODO: do some verification
 	eligible := make(map[string]bool)
 

@@ -21,7 +21,7 @@ Hyperledger = function(){
   }
 
   _this.queryAll = function(){
-    return query.executeQuery(_this.hlAdapter.client, _this.hlAdapter.channel, 'queryVotes', [''], defaultUserId);
+    return query.executeQuery(_this.client, _this.channel, 'queryVotes', [''], defaultUserId);
   }
 
   _this.registerUser = function(user) {
@@ -37,13 +37,45 @@ Hyperledger = function(){
     return enroll.enrollAdmin(_this.client);
   }
 
+  _this.initVote = function () {
+      console.log("Initializing the vote...")
+      return invoke.invokeTransaction(_this.client, _this.channel, 'initVote', [])
+  }
+
+  // beginSignUp requires initVote to have been called before
+  _this.beginSignUp = function (question) {
+      console.log("Starting Sign-Up phase...")
+      return invoke.invokeTransaction(_this.client, _this.channel, 'beginSignUp', [question])
+  }
+
+  _this.setEligible = function (userIds) {
+      console.log("Setting eligible voters to: \n" + userIds)
+      return invoke.invokeTransaction(_this.client, _this.channel, 'setEligible', userIds)
+  }
+
+  _this.registerForVote = function (userId) {
+      //ToDo: is the userId implicit?
+      console.log("Registering user - " + userId + " - for vote...")
+      //ToDo: what is up with the arguments? and what is the 4th argument?
+      return invoke.invokeTransaction(_this.client, _this.channel, 'setEligible', ['xG', 'vG', 'r'])
+  }
+
+  _this.computeTally = function () {
+      console.log("Computing the tally...")
+      //ToDo: is this a query or an invocation?
+      return invoke.invokeTransaction(_this.client, _this.channel, 'computeTally', [])
+  }
+
+
   _this.vote = function(selectedOption) {
-    invoke.invokeTransaction(_this.hlAdapter.client,
+    invoke.invokeTransaction(_this.client,
       _this.channel,
       'vote', //transaction function
       [selectedOption],
       defaultUserId);
   }
+
+
 
   init();
 }
