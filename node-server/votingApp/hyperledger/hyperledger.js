@@ -18,6 +18,7 @@ Hyperledger = function(){
     _this.hlAdapter = initClient.initFabricClient(host, channelId);
     _this.channel = _this.hlAdapter.channel;
     _this.client = _this.hlAdapter.client;
+    return this;
   }
 
   _this.queryAll = function(){
