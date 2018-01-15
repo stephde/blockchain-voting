@@ -24,11 +24,11 @@ func (s *SmartContract) register(stub shim.ChaincodeStubInterface, args []string
 	userID := string(userIDBytes)
 
 	// Public key of voter: xG
-	var xG []big.Int
+	var xG []*big.Int
 	json.Unmarshal([]byte(args[1]), &xG)
 	logger.Info("xG is ", xG)
 
-	var vG []big.Int
+	var vG []*big.Int
 	json.Unmarshal([]byte(args[2]), &vG)
 	logger.Info("vG is ", vG)
 
@@ -45,7 +45,7 @@ func (s *SmartContract) register(stub shim.ChaincodeStubInterface, args []string
 	isEligible := eligible[userID]
 	isRegistered := registered[userID]
 
-	if isEligible && !isRegistered && s.verifyZKP(userID, xG, r, vG) {
+	if isEligible && !isRegistered && s.verifyZKP(userID, xG, &r, vG) {
 		registered[userID] = true
 		PutState(stub, "registered", registered)
 
