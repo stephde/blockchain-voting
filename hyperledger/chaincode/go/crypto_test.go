@@ -10,14 +10,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func createZKP(userId string, x *big.Int, v *big.Int, xG []*big.Int) []*big.Int {
+func createZKP(userId string, x *big.Int, v *big.Int, publicKey *ecdsa.PublicKey) []*big.Int {
 
 	bitCurve := crypto.S256()
 
 	Gx := bitCurve.Params().Gx
 	Gy := bitCurve.Params().Gy
 
-	if !bitCurve.IsOnCurve(xG[0], xG[1]) {
+	if !bitCurve.IsOnCurve(publicKey.X, publicKey.Y) {
 		// raise exception
 		logger.Error("xG is not on curve")
 		return nil
@@ -26,14 +26,7 @@ func createZKP(userId string, x *big.Int, v *big.Int, xG []*big.Int) []*big.Int 
 	vGx, vGy := bitCurve.ScalarMult(Gx, Gy, v.Bytes())
 
 	// Get c = H(g, g^{x}, g^{v});
-	data := append(
-		[]byte(userId)[:],
-		append(Gx.Bytes()[:],
-			append(Gy.Bytes()[:],
-				append(xG[0].Bytes()[:],
-					append(xG[1].Bytes()[:],
-						append(vGx.Bytes()[:],
-							vGy.Bytes()[:]...)...)...)...)...)...)
+	data := Append([]byte(userId), Gx, Gy, publicKey.X, publicKey.Y, vGx, vGy)
 	hashBytes := sha256.Sum256(data)
 	c := new(big.Int)
 	c.SetBytes(hashBytes[:])
@@ -59,17 +52,15 @@ func Test_verifyZKP(t *testing.T) {
 	publicKeyECDSA, privateKeyECDSA := generateKeyPair()
 	userID := "someUserId"
 
-	xG := []*big.Int{publicKeyECDSA.X, publicKeyECDSA.Y}
-
 	// We abuse this as a PRNG (pseudo-random number generator)
 	_, vECDSA := generateKeyPair()
 	v := vECDSA.D
 
-	zkp := createZKP(userID, privateKeyECDSA.D, v, xG)
+	zkp := createZKP(userID, privateKeyECDSA.D, v, publicKeyECDSA)
 
 	r := zkp[0]
 	vG := []*big.Int{zkp[1], zkp[2], zkp[3]}
 
 	scc := new(SmartContract)
-	assert.True(t, scc.verifyZKP(userID, xG, r, vG))
+	assert.True(t, scc.verifyZKP(userID, publicKeyECDSA, r, vG))
 }
