@@ -28,14 +28,14 @@ func checkState(t *testing.T, stub *shim.MockStub, name string, value string) {
 	}
 }
 
-func checkQuery(t *testing.T, stub *shim.MockStub, function string, name string, value string) {
-	res := stub.MockInvoke("1", [][]byte{[]byte(function), []byte(name)})
+func checkQuery(t *testing.T, stub *shim.MockStub, function string, value string) {
+	res := stub.MockInvoke("1", [][]byte{[]byte(function)})
 	if res.Status != shim.OK {
-		fmt.Println("Query", function, "with", name, "failed", string(res.Message))
+		fmt.Println("Query", function, "failed", string(res.Message))
 		t.FailNow()
 	}
 	if res.Payload == nil {
-		fmt.Println("Query", name, "failed to get value")
+		fmt.Println("Query", function, "failed to get value")
 		t.FailNow()
 	}
 	if string(res.Payload) != value {
@@ -50,6 +50,18 @@ func checkInvoke(t *testing.T, stub *shim.MockStub, args [][]byte) {
 		fmt.Println("Invoke", args, "failed", string(res.Message))
 		t.FailNow()
 	}
+}
+
+func Test_Question(t *testing.T) {
+	scc := new(SmartContract)
+	stub := shim.NewMockStub("test_question", scc)
+
+	question := "What is the question?"
+	stub.MockTransactionStart("t123")
+	PutState(stub, "question", question)
+	stub.MockTransactionEnd("t123")
+
+	checkQuery(t, stub, "question", question)
 }
 
 func Test_ComputeTally(t *testing.T) {

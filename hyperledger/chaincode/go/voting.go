@@ -85,6 +85,8 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
 		return s.register(APIstub, args)
 	case "computeTally":
 		return s.computeTally(APIstub)
+	case "question":
+		return s.question(APIstub)
 	default:
 		return shim.Error("Invalid Smart Contract function name.")
 	}

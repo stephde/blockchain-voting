@@ -35,13 +35,8 @@ func (s *SmartContract) register(stub shim.ChaincodeStubInterface, args []string
 	var vG []*big.Int
 	json.Unmarshal([]byte(args[1]), &vG)
 
-	// var zkp *ecdsa.PublicKey
-	// zkp.X = vG[0]
-	// zkp.Y = vG[1]
-
 	var r big.Int
 	json.Unmarshal([]byte(args[2]), &r)
-	logger.Info("r is ", r)
 
 	var eligible map[string]bool
 	GetState(stub, "eligible", &eligible)
