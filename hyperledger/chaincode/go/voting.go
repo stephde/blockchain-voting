@@ -26,6 +26,7 @@ package main
 import (
 	"crypto/ecdsa"
 	"fmt"
+	"math/big"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	sc "github.com/hyperledger/fabric/protos/peer"
@@ -41,7 +42,7 @@ type Voter struct {
 	address          string
 	registeredKey    ecdsa.PublicKey
 	reconstructedKey ecdsa.PublicKey
-	vote             [2]int
+	vote             [2]*big.Int
 }
 
 // TODO: get from store
