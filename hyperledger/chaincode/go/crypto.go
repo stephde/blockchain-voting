@@ -170,6 +170,66 @@ func (s *SmartContract) verify1outOf2ZKP(
 	return true
 }
 
+func (s *SmartContract) create1outof2ZKPYesVote(
+	xG *ecdsa.PublicKey,
+	yG *ecdsa.PublicKey,
+	w *big.Int,
+	r1 *big.Int,
+	d1 *big.Int,
+	x *big.Int) ([]*big.Int, []*big.Int) {
+	// Return values
+	var res []*big.Int
+	var res2 []*big.Int
+
+	// Curve
+	curve := crypto.S256()
+
+	// Curve base point
+	Gx := curve.Params().Gx
+	Gy := curve.Params().Gy
+
+	var temp []*big.Int
+	var temp1 []*big.Int
+	var temp2 []*big.Int
+
+	// y = h^{x} * g
+	temp1[0], temp1[1] = curve.ScalarMult(yG.X, yG.Y, x.Bytes())
+	temp1[0], temp1[1] = curve.Add(temp1[0], temp1[1], Gx, Gy)
+	res[0] = temp1[0]
+	res[1] = temp1[1]
+
+	// a1 = g^{r1} * x^{d1}
+	temp1[0], temp1[1] = curve.ScalarMult(Gx, Gy, r1.Bytes())
+	temp2[0], temp2[1] = curve.ScalarMult(xG.X, xG.Y, d1.Bytes())
+	temp1[0], temp1[1] = curve.Add(temp1[0], temp1[1], temp2[0], temp2[1])
+	res[2] = temp1[0]
+	res[3] = temp1[1]
+
+	// b1 = h^{r1} * y^{d1} (temp = affine 'y')
+	temp1[0], temp1[1] = curve.ScalarMult(yG.X, yG.Y, r1.Bytes())
+
+	// Setting temp to 'y'
+	temp[0] = res[0]
+	temp[1] = res[1]
+
+	temp2[0], temp2[1] = curve.ScalarMult(temp[0], temp[1], d1.Bytes())
+	temp1[0], temp1[1] = curve.Add(temp1[0], temp1[1], temp2[0], temp2[1])
+	res[4] = temp1[0]
+	res[5] = temp1[1]
+
+	// a2 = g^{w}
+	temp1[0], temp1[1] = curve.ScalarMult(Gx, Gy, w.Bytes())
+	res[6] = temp1[0]
+	res[7] = temp1[1]
+
+	// b2 = h^{w} (where h = g^{y})
+	temp1[0], temp1[1] = curve.ScalarMult(yG.X, yG.Y, w.Bytes())
+	res[8] = temp1[0]
+	res[9] = temp1[1]
+
+	return res, res2
+}
+
 func Append(slice []byte, values ...*big.Int) []byte {
 	for _, r := range values {
 		slice = append(slice, r.Bytes()...)
