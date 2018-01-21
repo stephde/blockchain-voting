@@ -49,6 +49,7 @@ func generateKeyPair() (pubkey *ecdsa.PublicKey, privkey *ecdsa.PrivateKey) {
 }
 
 func (s *SmartContract) create1outof2ZKPYesVote(
+	userId string,
 	xG *ecdsa.PublicKey,
 	yG *ecdsa.PublicKey,
 	w *big.Int,
@@ -107,7 +108,7 @@ func (s *SmartContract) create1outof2ZKPYesVote(
 
 	// Get c = H(id, xG, Y, a1, b1, a2, b2);
 	// id is H(round, voter_index, voter_address, contract_address)...
-	data := Append([]byte("")[:], xG.X, xG.Y, res[0], res[1], res[2], res[3], res[4], res[5], res[6], res[7], res[8], res[8])
+	data := Append([]byte(userId)[:], xG.X, xG.Y, res[0], res[1], res[2], res[3], res[4], res[5], res[6], res[7], res[8], res[8])
 	hashBytes := sha256.Sum256(data)
 	c := new(big.Int)
 	c.SetBytes(hashBytes[:])
@@ -124,6 +125,34 @@ func (s *SmartContract) create1outof2ZKPYesVote(
 	res2[3] = temp[1]
 
 	return res, res2
+}
+
+func Test_VerifyYesVote(t *testing.T) {
+	// var xG = [voter[0][0], voter[0][1]];
+	//       var yG = [voter[1][0], voter[1][1]];
+	//       if (choice == 1) {
+	//           choice_text = "YES";
+	//           result = cryptoAddr.create1outof2ZKPYesVote.call(xG, yG, w, r, d, x, {
+	//               from: web3.eth.accounts[accounts_index]
+	//           });
+	//       } else {
+	//           choice_text = "NO";
+	//           result = cryptoAddr.create1outof2ZKPNoVote.call(xG, yG, w, r, d, x, {
+	//               from: web3.eth.accounts[accounts_index]
+	//           });
+	//       }
+	//       var y = [result[0][0], result[0][1]];
+	//       var a1 = [result[0][2], result[0][3]];
+	//       var b1 = [result[0][4], result[0][5]];
+	//       var a2 = [result[0][6], result[0][7]];
+	//       var b2 = [result[0][8], result[0][9]];
+	//       var params = [result[1][0], result[1][1], result[1][2], result[1][3]];
+	//       result = anonymousvotingAddr.verify1outof2ZKP.call(params, y, a1, b1, a2, b2, {
+	//           from: web3.eth.accounts[accounts_index]
+	//       });
+
+	publicKeyECDSA, privateKeyECDSA := generateKeyPair()
+
 }
 
 func Test_verifyZKP(t *testing.T) {

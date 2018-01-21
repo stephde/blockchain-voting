@@ -45,12 +45,6 @@ type Voter struct {
 	vote             [2]*big.Int
 }
 
-// TODO: get from store
-// func getVoter(address string) ([2]int, [2]int) {
-// 	index := addressid[address]
-// 	return voters[index].registeredKey, voters[index].reconstructedKey
-// }
-
 /*
  * Hyperledger Chaincode Interface
  */
