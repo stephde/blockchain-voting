@@ -15,13 +15,22 @@ function runElection() {
     }
 
     runFuncParallelForUsers((userId) => hyperledger.registerUser({id: userId}), userIds)
-        .then(() => hyperledger.initVote())
-        .then(() => hyperledger.setEligible(userIds))
-        .then(() => hyperledger.beginSignUp("Do you like Blockchain?"))
-        .then(() => runFuncParallelForUsers((userId) => hyperledger.registerForVote(userId), userIds))
+        .then(() => timedCall(hyperledger.initVote, [], 'Init Vote'))
+        .then(() => timedCall(hyperledger.setEligible, userIds, 'Set Eligible'))
+        .then(() => timedCall(hyperledger.beginSignUp, "Do you like Blockchain?", 'begin sign up'))
+        .then(() => timedCall(()=>runFuncParallelForUsers((userId) => hyperledger.registerForVote(userId), userIds), [], 'register for vote'))
         //ToDo: add voting step
-        .then(() => hyperledger.computeTally())
+        .then(() => timedCall(hyperledger.computeTally, [], "compute tally"))
         .then(console.log, console.log)
+}
+
+function timedCall(func, params, identifier){
+  var start = new Date().getTime();
+  var promise = func(params);
+  var end = new Date().getTime();
+  var totalTime = end-start;
+  console.log("Time spend for "+identifier + ": "+ totalTime+ "ms")
+  return promise;
 }
 
 function runFuncParallelForUsers(func, userIds) {
