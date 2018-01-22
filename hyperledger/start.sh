@@ -37,7 +37,10 @@ docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/etc/h
 docker-compose -f ./docker-compose.yml up -d cli
 
 # Install go dependencies
+# docker exec cli /opt/gopath/src/hpi.de/go/upgradeGo.sh
 docker exec cli /opt/gopath/src/hpi.de/go/loadDependencies.sh
+docker exec peer0.org1.example.com /opt/gopath/src/hpi.de/go/upgradeGo.sh
+# docker exec peer0.org1.example.com /opt/gopath/src/hpi.de/go/loadDependencies.sh
 
 printf "\n############### Installing chaincode\n"
 docker exec cli peer chaincode install -n vote -v 1.0 -p "$CC_SRC_PATH" -l "$LANGUAGE"
