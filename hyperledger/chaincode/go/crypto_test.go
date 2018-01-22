@@ -48,7 +48,7 @@ func generateKeyPair() (pubkey *ecdsa.PublicKey, privkey *ecdsa.PrivateKey) {
 	return &key.PublicKey, key
 }
 
-func (s *SmartContract) create1outof2ZKPYesVote(
+func create1outof2ZKPYesVote(
 	userId string,
 	xG *ecdsa.PublicKey,
 	yG *ecdsa.PublicKey,
@@ -128,19 +128,15 @@ func (s *SmartContract) create1outof2ZKPYesVote(
 }
 
 func Test_VerifyYesVote(t *testing.T) {
+	// Registered Key (public keys)
 	// var xG = [voter[0][0], voter[0][1]];
-	//       var yG = [voter[1][0], voter[1][1]];
+	// Reconstructed Key (private key?)
+	// var yG = [voter[1][0], voter[1][1]];
 	//       if (choice == 1) {
 	//           choice_text = "YES";
 	//           result = cryptoAddr.create1outof2ZKPYesVote.call(xG, yG, w, r, d, x, {
 	//               from: web3.eth.accounts[accounts_index]
 	//           });
-	//       } else {
-	//           choice_text = "NO";
-	//           result = cryptoAddr.create1outof2ZKPNoVote.call(xG, yG, w, r, d, x, {
-	//               from: web3.eth.accounts[accounts_index]
-	//           });
-	//       }
 	//       var y = [result[0][0], result[0][1]];
 	//       var a1 = [result[0][2], result[0][3]];
 	//       var b1 = [result[0][4], result[0][5]];
@@ -152,6 +148,10 @@ func Test_VerifyYesVote(t *testing.T) {
 	//       });
 
 	publicKeyECDSA, privateKeyECDSA := generateKeyPair()
+	result1, result2 := create1outof2ZKPYesVote(userId, )
+
+	
+	y := result1[]
 
 }
 
