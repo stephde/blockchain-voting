@@ -40,9 +40,9 @@ type SmartContract struct {
 
 type Voter struct {
 	address          string
-	registeredKey    ecdsa.PublicKey
-	reconstructedKey ecdsa.PublicKey
-	vote             [2]*big.Int
+	registeredKey    *ecdsa.PublicKey
+	reconstructedKey *ecdsa.PublicKey
+	vote             []*big.Int
 }
 
 /*

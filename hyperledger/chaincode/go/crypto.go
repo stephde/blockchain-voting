@@ -8,6 +8,18 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 )
 
+//[0] = x (private key)
+//[1] = xG (public key)
+//[2] = v (random nonce for zkp)
+//[3] = w (random nonce for 1outof2 zkp)
+//[4] = r (1 or 2, random nonce for 1outof2 zkp)
+//[5] = d (1 or 2, random nonce for 1outof2 zkp)
+
+// x & xG is the voting key
+// v is the blinding factor for single zkp
+// w,r,d is required for 1 out of 2 zkp.
+// yG is recomputed public key - we get this from Ethereum
+
 // from https://github.com/vsergeev/btckeygenie/blob/master/btckey/elliptic.go
 // addMod computes z = (x + y) % p.
 func addMod(x *big.Int, y *big.Int, p *big.Int) (z *big.Int) {

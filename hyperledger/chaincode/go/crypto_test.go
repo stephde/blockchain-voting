@@ -38,6 +38,11 @@ func createZKP(userId string, x *big.Int, v *big.Int, publicKey *ecdsa.PublicKey
 	return []*big.Int{r, vGx, vGy, v}
 }
 
+func generateRandomSeed() *big.Int {
+	_, privateKeyECDSA1 := generateKeyPair()
+	return privateKeyECDSA1.D
+}
+
 // from secp256k1.
 func generateKeyPair() (pubkey *ecdsa.PublicKey, privkey *ecdsa.PrivateKey) {
 
@@ -147,12 +152,39 @@ func Test_VerifyYesVote(t *testing.T) {
 	//           from: web3.eth.accounts[accounts_index]
 	//       });
 
-	publicKeyECDSA, privateKeyECDSA := generateKeyPair()
-	result1, result2 := create1outof2ZKPYesVote(userId, )
+	publicKeyECDSA1, _ := generateKeyPair()
+	publicKeyECDSA2, _ := generateKeyPair()
+	publicKeyECDSA3, _ := generateKeyPair()
+	var emptyVote []*big.Int
+	var emptyReconstructedKey *ecdsa.PublicKey
+	voter1 := Voter{"userID1", publicKeyECDSA1, emptyReconstructedKey, emptyVote}
+	voter2 := Voter{"userID2", publicKeyECDSA2, emptyReconstructedKey, emptyVote}
+	voter3 := Voter{"userID3", publicKeyECDSA3, emptyReconstructedKey, emptyVote}
 
-	
-	y := result1[]
+	scc := new(SmartContract)
 
+	voters := []Voter{voter1, voter2, voter3}
+	scc.reconstructKeys(3, voters)
+
+	w := generateRandomSeed()
+	r := generateRandomSeed()
+	d := generateRandomSeed()
+	x := generateRandomSeed()
+	result1, result2 := create1outof2ZKPYesVote("userID1", voters[0].registeredKey, voters[0].reconstructedKey, w, r, d, x)
+
+	var y *ecdsa.PublicKey
+	var a1 *ecdsa.PublicKey
+	var b1 *ecdsa.PublicKey
+	var a2 *ecdsa.PublicKey
+	var b2 *ecdsa.PublicKey
+
+	y.X, y.Y = result1[0], result1[1]
+	a1.X, a1.Y = result1[2], result1[3]
+	b1.X, b1.Y = result1[4], result1[5]
+	a2.X, a2.Y = result1[6], result1[7]
+	b2.X, b2.Y = result1[8], result1[9]
+
+	assert.True(t, scc.verify1outOf2ZKP(voter1, result2, y, a1, b1, a2, b2))
 }
 
 func Test_verifyZKP(t *testing.T) {
