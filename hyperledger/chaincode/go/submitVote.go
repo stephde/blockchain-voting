@@ -10,7 +10,7 @@ func (s *SmartContract) submitVote(stub shim.ChaincodeStubInterface, args []stri
 		return shim.Error("Wrong state")
 	}
 
-	// get sender address - expect to be sent as first argument
+	// get sender address
 	creator, err := stub.GetCreator()
 	userID := args[0]
 
@@ -28,7 +28,7 @@ func (s *SmartContract) submitVote(stub shim.ChaincodeStubInterface, args []stri
 	value2, found2 := votecast[userID]
 
 	logger.Info("User is registered? ", found1)
-	logger.Info("User has voted? ", found2)
+	logger.Info("User has voted? ", value2)
 
 	if found1 && found2 && value1 && !value2 {
 		// User is registered and did not cast vote yet

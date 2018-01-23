@@ -28,14 +28,14 @@ func checkState(t *testing.T, stub *shim.MockStub, name string, value string) {
 	}
 }
 
-func checkQuery(t *testing.T, stub *shim.MockStub, function string, name string, value string) {
-	res := stub.MockInvoke("1", [][]byte{[]byte(function), []byte(name)})
+func checkQuery(t *testing.T, stub *shim.MockStub, function string, value string) {
+	res := stub.MockInvoke("1", [][]byte{[]byte(function)})
 	if res.Status != shim.OK {
-		fmt.Println("Query", function, "with", name, "failed", string(res.Message))
+		fmt.Println("Query", function, "failed", string(res.Message))
 		t.FailNow()
 	}
 	if res.Payload == nil {
-		fmt.Println("Query", name, "failed to get value")
+		fmt.Println("Query", function, "failed to get value")
 		t.FailNow()
 	}
 	if string(res.Payload) != value {
@@ -52,7 +52,31 @@ func checkInvoke(t *testing.T, stub *shim.MockStub, args [][]byte) {
 	}
 }
 
+func Test_InvalidFunctionName(t *testing.T) {
+	scc := new(SmartContract)
+	stub := shim.NewMockStub("test_invalid_question", scc)
+
+	res := stub.MockInvoke("1", [][]byte{[]byte("someInvalidFunction")})
+	if res.Status != shim.ERROR {
+		fmt.Println("Query test_question succeeded", string(res.Message))
+		t.FailNow()
+	}
+}
+
+func Test_Question(t *testing.T) {
+	scc := new(SmartContract)
+	stub := shim.NewMockStub("test_question", scc)
+
+	question := "What is the question?"
+	stub.MockTransactionStart("t123")
+	PutState(stub, "question", question)
+	stub.MockTransactionEnd("t123")
+
+	checkQuery(t, stub, "question", question)
+}
+
 func Test_ComputeTally(t *testing.T) {
+
 	scc := new(SmartContract)
 	stub := shim.NewMockStub("test_computeTally", scc)
 
@@ -64,6 +88,7 @@ func Test_ComputeTally(t *testing.T) {
 }
 
 func Test_Register(t *testing.T) {
+
 	scc := new(SmartContract)
 	stub := shim.NewMockStub("test_register", scc)
 
@@ -77,7 +102,6 @@ func Test_Register(t *testing.T) {
 
 	checkInvoke(t, stub, [][]byte{
 		[]byte("register"),
-		[]byte("userId"),
 		[]byte("[1, 2]"),
 		[]byte("[1, 2, 3]"),
 		[]byte("1"),
@@ -90,10 +114,11 @@ func Test_Register(t *testing.T) {
 	GetState(stub, "registered", &registered)
 	assert.True(t, registered["userId"])
 
-	// TODO: verify that voter was storede
+	// TODO: verify that voter was stored
 }
 
 func Test_SetEligible(t *testing.T) {
+
 	scc := new(SmartContract)
 	stub := shim.NewMockStub("test_setEligible", scc)
 
@@ -117,6 +142,7 @@ func Test_SetEligible(t *testing.T) {
 }
 
 func Test_InitVote(t *testing.T) {
+
 	scc := new(SmartContract)
 	stub := shim.NewMockStub("test_beginSignup", scc)
 
@@ -128,6 +154,7 @@ func Test_InitVote(t *testing.T) {
 }
 
 func Test_BeginSignup(t *testing.T) {
+
 	scc := new(SmartContract)
 	stub := shim.NewMockStub("test_beginSignup", scc)
 
@@ -147,6 +174,7 @@ func Test_BeginSignup(t *testing.T) {
 }
 
 func Test_SubmitVote(t *testing.T) {
+
 	scc := new(SmartContract)
 	stub := shim.NewMockStub("test_submitVote", scc)
 

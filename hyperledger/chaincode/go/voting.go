@@ -24,6 +24,7 @@ package main
  * 2 specific Hyperledger Fabric specific libraries for Smart Contracts
  */
 import (
+	"crypto/ecdsa"
 	"fmt"
 	"math/big"
 
@@ -39,16 +40,10 @@ type SmartContract struct {
 
 type Voter struct {
 	address          string
-	registeredKey    []big.Int
-	reconstructedKey []big.Int
-	vote             [2]int
+	registeredKey    *ecdsa.PublicKey
+	reconstructedKey *ecdsa.PublicKey
+	vote             []*big.Int
 }
-
-// TODO: get from store
-// func getVoter(address string) ([2]int, [2]int) {
-// 	index := addressid[address]
-// 	return voters[index].registeredKey, voters[index].reconstructedKey
-// }
 
 /*
  * Hyperledger Chaincode Interface
@@ -85,26 +80,11 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
 		return s.register(APIstub, args)
 	case "computeTally":
 		return s.computeTally(APIstub)
+	case "question":
+		return s.question(APIstub)
 	default:
-		return shim.Error("Invalid Smart Contract function name.")
+		return shim.Error("Invalid Smart Contract function name: " + function)
 	}
-}
-
-/*
- * Custom functions
- */
-
-func (s *SmartContract) computeTally(stub shim.ChaincodeStubInterface) sc.Response {
-
-	var totalRegistered int
-	GetState(stub, "totalregistered", &totalRegistered)
-
-	// for (i := 0; i < totalRegistered; i++) {
-	// TODO: confirm that all votes have been cast...
-	// }
-
-	return shim.Error("Not implemented yet")
-
 }
 
 // The main function is only relevant in unit test mode. Only included here for completeness.

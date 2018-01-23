@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/ecdsa"
 	"encoding/json"
 	"math/big"
 
@@ -13,8 +14,8 @@ func (s *SmartContract) register(stub shim.ChaincodeStubInterface, args []string
 		return shim.Error("Wrong state")
 	}
 
-	if len(args) != 4 {
-		return shim.Error("Wrong number of arguments, expected 4")
+	if len(args) != 3 {
+		return shim.Error("Wrong number of arguments, expected 3")
 	}
 
 	// TODO: what do these names mean?
@@ -24,17 +25,18 @@ func (s *SmartContract) register(stub shim.ChaincodeStubInterface, args []string
 	userID := string(userIDBytes)
 
 	// Public key of voter: xG
-	var xG []big.Int
-	json.Unmarshal([]byte(args[1]), &xG)
-	logger.Info("xG is ", xG)
+	var xG []*big.Int
+	json.Unmarshal([]byte(args[0]), &xG)
 
-	var vG []big.Int
-	json.Unmarshal([]byte(args[2]), &vG)
-	logger.Info("vG is ", vG)
+	publicKey := new(ecdsa.PublicKey)
+	publicKey.X = xG[0]
+	publicKey.Y = xG[1]
+
+	var vG []*big.Int
+	json.Unmarshal([]byte(args[1]), &vG)
 
 	var r big.Int
-	json.Unmarshal([]byte(args[3]), &r)
-	logger.Info("r is ", r)
+	json.Unmarshal([]byte(args[2]), &r)
 
 	var eligible map[string]bool
 	GetState(stub, "eligible", &eligible)
@@ -45,7 +47,11 @@ func (s *SmartContract) register(stub shim.ChaincodeStubInterface, args []string
 	isEligible := eligible[userID]
 	isRegistered := registered[userID]
 
-	if isEligible && !isRegistered && s.verifyZKP(userID, xG, r, vG) {
+	var emptyVote []*big.Int
+	emptyReconstructedKey := new(ecdsa.PublicKey)
+	voter := Voter{userID, publicKey, emptyReconstructedKey, emptyVote}
+
+	if isEligible && !isRegistered && s.verifyZKP(voter, &r, vG) {
 		registered[userID] = true
 		PutState(stub, "registered", registered)
 
