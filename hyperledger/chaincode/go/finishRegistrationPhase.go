@@ -59,7 +59,7 @@ func (s *SmartContract) reconstructKeys(totalRegistered int, voters []Voter) []V
 
 	voterZero.reconstructedKey.X = afteri[0]
 	voterZero.reconstructedKey.Y = big.NewInt(0).Sub(pp, afteri[1])
-	logger.Info(voters[0])
+
 	// Step 2 is to add to beforei, and subtract from afteri.
 	for i := 1; i < totalRegistered; i++ {
 
@@ -70,14 +70,10 @@ func (s *SmartContract) reconstructKeys(totalRegistered int, voters []Voter) []V
 			beforei[0], beforei[1] = curve.Add(beforei[0], beforei[1], voters[i-1].registeredKey.X, voters[i-1].registeredKey.Y)
 		}
 
-		logger.Info("After i==1")
-
 		// If we have reached the end... just store beforei
 		// Otherwise, we need to compute a key.
 		// Counting from 0 to n-1...
 		voter := &voters[i]
-
-		logger.Info("After i==1")
 
 		if i == (totalRegistered - 1) {
 			(*voter).reconstructedKey.X = beforei[0]
@@ -96,8 +92,6 @@ func (s *SmartContract) reconstructKeys(totalRegistered int, voters []Voter) []V
 
 			(*voter).reconstructedKey.X, (*voter).reconstructedKey.Y = yG[0], yG[1]
 		}
-
-		logger.Info("After if else")
 	}
 
 	return voters

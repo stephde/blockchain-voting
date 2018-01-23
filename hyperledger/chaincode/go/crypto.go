@@ -129,7 +129,7 @@ func (s *SmartContract) verify1outOf2ZKP(
 	logger.Info(params[0])
 	logger.Info(params[1])
 	if c != addMod(params[0], params[1], curve.Params().N) {
-		logger.Info("False in 128")
+		logger.Error("c != addMod(params[0], params[1], curve.Params().N)")
 		return false
 	}
 
@@ -139,7 +139,7 @@ func (s *SmartContract) verify1outOf2ZKP(
 	temp3[0], temp3[1] = curve.Add(temp2[0], temp2[1], tempX, tempY)
 
 	if a1.X != temp3[0] || a1.Y != temp3[1] {
-		logger.Info("False in 138")
+		logger.Error("a1.X != temp3[0] || a1.Y != temp3[1]")
 		return false
 	}
 
@@ -149,7 +149,7 @@ func (s *SmartContract) verify1outOf2ZKP(
 	temp3[0], temp3[1] = curve.Add(temp2[0], temp2[1], tempX, tempY)
 
 	if b1.X != temp3[0] || b1.Y != temp3[1] {
-		logger.Info("False in 148")
+		logger.Error("b1.X != temp3[0] || b1.Y != temp3[1]")
 		return false
 	}
 
@@ -159,7 +159,7 @@ func (s *SmartContract) verify1outOf2ZKP(
 	temp3[0], temp3[1] = curve.Add(temp2[0], temp2[1], tempX, tempY)
 
 	if a2.X != temp3[0] || a2.Y != temp3[1] {
-		logger.Info("False in 158")
+		logger.Error("a2.X != temp3[0] || a2.Y != temp3[1]")
 		return false
 	}
 
@@ -183,7 +183,7 @@ func (s *SmartContract) verify1outOf2ZKP(
 	temp3[0], temp3[1] = curve.Add(foo, bar, temp2[0], temp2[1])
 
 	if b2.X != temp3[0] || b2.Y != temp3[1] {
-		logger.Info("False in 182")
+		logger.Error("b2.X != temp3[0] || b2.Y != temp3[1]")
 		return false
 	}
 
