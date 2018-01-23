@@ -45,37 +45,40 @@ func (s *SmartContract) reconstructKeys(totalRegistered int, voters []Voter) []V
 
 	// Step 1 is to compute the index 1 reconstructed key
 	voterOne := voters[1]
-	logger.Info(voterOne)
 	voterOneRegisteredKey := voterOne.registeredKey
 	afteri[0] = voterOneRegisteredKey.X
 	afteri[1] = voterOneRegisteredKey.Y
 
 	for i := 2; i < totalRegistered; i++ {
-		logger.Info("i is ", i)
 		voter := voters[i]
 		registeredKey := voter.registeredKey
 		afteri[0], afteri[1] = curve.Add(afteri[0], afteri[1], registeredKey.X, registeredKey.Y)
 	}
 
-	voters[0].reconstructedKey.X = afteri[0]
-	voters[0].reconstructedKey.Y = big.NewInt(0).Sub(pp, afteri[1])
+	voterZero := voters[0]
 
+	voterZero.reconstructedKey.X = afteri[0]
+	voterZero.reconstructedKey.Y = big.NewInt(0).Sub(pp, afteri[1])
 	logger.Info(voters[0])
 	// Step 2 is to add to beforei, and subtract from afteri.
 	for i := 1; i < totalRegistered; i++ {
 
 		if i == 1 {
-			logger.Info(voters[0])
 			beforei[0] = voters[0].registeredKey.X
 			beforei[1] = voters[0].registeredKey.Y
 		} else {
 			beforei[0], beforei[1] = curve.Add(beforei[0], beforei[1], voters[i-1].registeredKey.X, voters[i-1].registeredKey.Y)
 		}
 
+		logger.Info("After i==1")
+
 		// If we have reached the end... just store beforei
 		// Otherwise, we need to compute a key.
 		// Counting from 0 to n-1...
 		voter := &voters[i]
+
+		logger.Info("After i==1")
+
 		if i == (totalRegistered - 1) {
 			(*voter).reconstructedKey.X = beforei[0]
 			(*voter).reconstructedKey.Y = beforei[1]
@@ -93,6 +96,8 @@ func (s *SmartContract) reconstructKeys(totalRegistered int, voters []Voter) []V
 
 			(*voter).reconstructedKey.X, (*voter).reconstructedKey.Y = yG[0], yG[1]
 		}
+
+		logger.Info("After if else")
 	}
 
 	return voters

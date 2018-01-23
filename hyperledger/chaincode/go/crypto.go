@@ -55,8 +55,10 @@ func mulMod(x *big.Int, y *big.Int, p *big.Int) (z *big.Int) {
  * r: ?
  * vG: ZKP
  */
-func (s *SmartContract) verifyZKP(userID string, xG *ecdsa.PublicKey, r *big.Int, vG []*big.Int) bool {
+func (s *SmartContract) verifyZKP(v Voter, r *big.Int, vG []*big.Int) bool {
 	bitCurve := crypto.S256()
+
+	xG := v.registeredKey
 
 	logger.Info(bitCurve.IsOnCurve(xG.X, xG.Y))
 
@@ -73,7 +75,7 @@ func (s *SmartContract) verifyZKP(userID string, xG *ecdsa.PublicKey, r *big.Int
 	Gx := bitCurve.Params().Gx
 	Gy := bitCurve.Params().Gy
 
-	data := Append([]byte(userID), Gx, Gy, xG.X, xG.Y, vG[0], vG[1])
+	data := Append([]byte(v.address), Gx, Gy, xG.X, xG.Y, vG[0], vG[1])
 	hashBytes := sha256.Sum256(data)
 	c := new(big.Int)
 	c.SetBytes(hashBytes[:])
@@ -91,7 +93,7 @@ func (s *SmartContract) verifyZKP(userID string, xG *ecdsa.PublicKey, r *big.Int
 
 func (s *SmartContract) verify1outOf2ZKP(
 	v Voter,
-	params []*big.Int,
+	params [4]*big.Int,
 	y *ecdsa.PublicKey,
 	a1 *ecdsa.PublicKey,
 	b1 *ecdsa.PublicKey,
@@ -99,9 +101,9 @@ func (s *SmartContract) verify1outOf2ZKP(
 	b2 *ecdsa.PublicKey) bool {
 	curve := crypto.S256()
 
-	var temp1 []*big.Int
-	var temp2 []*big.Int
-	var temp3 []*big.Int
+	var temp1 [2]*big.Int
+	var temp2 [2]*big.Int
+	var temp3 [2]*big.Int
 
 	yG := v.reconstructedKey
 	publicKey := v.registeredKey // xG in OpenVote
@@ -118,13 +120,16 @@ func (s *SmartContract) verify1outOf2ZKP(
 		return false
 	}
 
-	data := Append([]byte("")[:], publicKey.X, publicKey.Y, y.X, y.Y, a1.X, a1.Y, b1.X, b1.Y, a2.X, a2.Y, b2.X, b2.Y)
+	data := Append([]byte(v.address)[:], publicKey.X, publicKey.Y, y.X, y.Y, a1.X, a1.Y, b1.X, b1.Y, a2.X, a2.Y, b2.X, b2.Y)
 	hashBytes := sha256.Sum256(data)
 	c := new(big.Int)
 	c.SetBytes(hashBytes[:])
 
 	// Does c =? d1 + d2 (mod n)
+	logger.Info(params[0])
+	logger.Info(params[1])
 	if c != addMod(params[0], params[1], curve.Params().N) {
+		logger.Info("False in 128")
 		return false
 	}
 
@@ -134,6 +139,7 @@ func (s *SmartContract) verify1outOf2ZKP(
 	temp3[0], temp3[1] = curve.Add(temp2[0], temp2[1], tempX, tempY)
 
 	if a1.X != temp3[0] || a1.Y != temp3[1] {
+		logger.Info("False in 138")
 		return false
 	}
 
@@ -143,6 +149,7 @@ func (s *SmartContract) verify1outOf2ZKP(
 	temp3[0], temp3[1] = curve.Add(temp2[0], temp2[1], tempX, tempY)
 
 	if b1.X != temp3[0] || b1.Y != temp3[1] {
+		logger.Info("False in 148")
 		return false
 	}
 
@@ -152,6 +159,7 @@ func (s *SmartContract) verify1outOf2ZKP(
 	temp3[0], temp3[1] = curve.Add(temp2[0], temp2[1], tempX, tempY)
 
 	if a2.X != temp3[0] || a2.Y != temp3[1] {
+		logger.Info("False in 158")
 		return false
 	}
 
@@ -162,7 +170,6 @@ func (s *SmartContract) verify1outOf2ZKP(
 	// get 'y'
 	temp3[0] = y.X
 	temp3[1] = y.Y
-	temp3[2] = big.NewInt(1)
 
 	temp2[0], temp2[1] = curve.Add(temp3[0], temp3[1], temp1[0], temp1[1])
 	temp1[0] = temp2[0]
@@ -176,6 +183,7 @@ func (s *SmartContract) verify1outOf2ZKP(
 	temp3[0], temp3[1] = curve.Add(foo, bar, temp2[0], temp2[1])
 
 	if b2.X != temp3[0] || b2.Y != temp3[1] {
+		logger.Info("False in 182")
 		return false
 	}
 

@@ -28,7 +28,7 @@ func (s *SmartContract) register(stub shim.ChaincodeStubInterface, args []string
 	var xG []*big.Int
 	json.Unmarshal([]byte(args[0]), &xG)
 
-	var publicKey ecdsa.PublicKey
+	publicKey := new(ecdsa.PublicKey)
 	publicKey.X = xG[0]
 	publicKey.Y = xG[1]
 
@@ -47,7 +47,11 @@ func (s *SmartContract) register(stub shim.ChaincodeStubInterface, args []string
 	isEligible := eligible[userID]
 	isRegistered := registered[userID]
 
-	if isEligible && !isRegistered && s.verifyZKP(userID, &publicKey, &r, vG) {
+	var emptyVote []*big.Int
+	emptyReconstructedKey := new(ecdsa.PublicKey)
+	voter := Voter{userID, publicKey, emptyReconstructedKey, emptyVote}
+
+	if isEligible && !isRegistered && s.verifyZKP(voter, &r, vG) {
 		registered[userID] = true
 		PutState(stub, "registered", registered)
 

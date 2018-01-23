@@ -54,16 +54,18 @@ func generateKeyPair() (pubkey *ecdsa.PublicKey, privkey *ecdsa.PrivateKey) {
 }
 
 func create1outof2ZKPYesVote(
-	userId string,
-	xG *ecdsa.PublicKey,
-	yG *ecdsa.PublicKey,
+	v Voter,
 	w *big.Int,
 	r1 *big.Int,
 	d1 *big.Int,
-	x *big.Int) ([]*big.Int, []*big.Int) {
+	x *big.Int) ([10]*big.Int, [4]*big.Int) {
 	// Return values
-	var res []*big.Int
-	var res2 []*big.Int
+	var res [10]*big.Int
+	var res2 [4]*big.Int
+
+	// Public and reconstructed ke
+	xG := v.registeredKey
+	yG := v.reconstructedKey
 
 	// Curve
 	curve := crypto.S256()
@@ -72,9 +74,9 @@ func create1outof2ZKPYesVote(
 	Gx := curve.Params().Gx
 	Gy := curve.Params().Gy
 
-	var temp []*big.Int
-	var temp1 []*big.Int
-	var temp2 []*big.Int
+	var temp [2]*big.Int
+	var temp1 [2]*big.Int
+	var temp2 [2]*big.Int
 
 	// y = h^{x} * g
 	temp1[0], temp1[1] = curve.ScalarMult(yG.X, yG.Y, x.Bytes())
@@ -113,7 +115,7 @@ func create1outof2ZKPYesVote(
 
 	// Get c = H(id, xG, Y, a1, b1, a2, b2);
 	// id is H(round, voter_index, voter_address, contract_address)...
-	data := Append([]byte(userId)[:], xG.X, xG.Y, res[0], res[1], res[2], res[3], res[4], res[5], res[6], res[7], res[8], res[8])
+	data := Append([]byte(v.address)[:], xG.X, xG.Y, res[0], res[1], res[2], res[3], res[4], res[5], res[6], res[7], res[8], res[8])
 	hashBytes := sha256.Sum256(data)
 	c := new(big.Int)
 	c.SetBytes(hashBytes[:])
@@ -156,7 +158,7 @@ func Test_VerifyYesVote(t *testing.T) {
 	publicKeyECDSA2, _ := generateKeyPair()
 	publicKeyECDSA3, _ := generateKeyPair()
 	var emptyVote []*big.Int
-	var emptyReconstructedKey *ecdsa.PublicKey
+	emptyReconstructedKey := new(ecdsa.PublicKey)
 	voter1 := Voter{"userID1", publicKeyECDSA1, emptyReconstructedKey, emptyVote}
 	voter2 := Voter{"userID2", publicKeyECDSA2, emptyReconstructedKey, emptyVote}
 	voter3 := Voter{"userID3", publicKeyECDSA3, emptyReconstructedKey, emptyVote}
@@ -170,13 +172,13 @@ func Test_VerifyYesVote(t *testing.T) {
 	r := generateRandomSeed()
 	d := generateRandomSeed()
 	x := generateRandomSeed()
-	result1, result2 := create1outof2ZKPYesVote("userID1", voters[0].registeredKey, voters[0].reconstructedKey, w, r, d, x)
+	result1, result2 := create1outof2ZKPYesVote(voters[0], w, r, d, x)
 
-	var y *ecdsa.PublicKey
-	var a1 *ecdsa.PublicKey
-	var b1 *ecdsa.PublicKey
-	var a2 *ecdsa.PublicKey
-	var b2 *ecdsa.PublicKey
+	y := new(ecdsa.PublicKey)
+	a1 := new(ecdsa.PublicKey)
+	b1 := new(ecdsa.PublicKey)
+	a2 := new(ecdsa.PublicKey)
+	b2 := new(ecdsa.PublicKey)
 
 	y.X, y.Y = result1[0], result1[1]
 	a1.X, a1.Y = result1[2], result1[3]
@@ -184,12 +186,17 @@ func Test_VerifyYesVote(t *testing.T) {
 	a2.X, a2.Y = result1[6], result1[7]
 	b2.X, b2.Y = result1[8], result1[9]
 
+	logger.Info("Created all inputs for verify")
+
 	assert.True(t, scc.verify1outOf2ZKP(voter1, result2, y, a1, b1, a2, b2))
 }
 
 func Test_verifyZKP(t *testing.T) {
 	publicKeyECDSA, privateKeyECDSA := generateKeyPair()
 	userID := "someUserId"
+	emptyReconstructedKey := new(ecdsa.PublicKey)
+	var emptyVote []*big.Int
+	voter := Voter{userID, publicKeyECDSA, emptyReconstructedKey, emptyVote}
 
 	// We abuse this as a PRNG (pseudo-random number generator)
 	_, vECDSA := generateKeyPair()
@@ -201,5 +208,5 @@ func Test_verifyZKP(t *testing.T) {
 	vG := []*big.Int{zkp[1], zkp[2], zkp[3]}
 
 	scc := new(SmartContract)
-	assert.True(t, scc.verifyZKP(userID, publicKeyECDSA, r, vG))
+	assert.True(t, scc.verifyZKP(voter, r, vG))
 }
