@@ -21,7 +21,6 @@ func (s *SmartContract) finishRegistrationPhase(stub shim.ChaincodeStubInterface
 	GetState(stub, "registered", &registered)
 
 	votecast := map[string]bool{}
-
 	for voterUserID, registered := range registered {
 		if registered {
 			votecast[voterUserID] = false

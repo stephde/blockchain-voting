@@ -6,7 +6,7 @@ let Hyperledger = require("./hyperledger.js");
 let hyperledger = new Hyperledger();
 
 function runElection() {
-    const numOfUsers = 3;
+    const numOfUsers = 10;
 
     let userIds = []
     for (let i=0; i < numOfUsers; i++) {
@@ -19,7 +19,7 @@ function runElection() {
         .then(() => timedCall(hyperledger.beginSignUp, "Do you like Blockchain?", 'begin sign up'))
         .then(() => timedCall(() => runFuncParallelForUsers((userId) => hyperledger.registerForVote(userId), userIds), [], 'register for vote'))
         .then(() => timedCall(hyperledger.finishRegistrationPhase, [], 'finishRegistrationPhase'))
-        .then(() => timedCall(() => runFuncParallelForUsers((userId) => hyperledger.vote(userId, 0), userIds), [], 'voting'))
+        .then(() => timedCall(() => runFuncParallelForUsers((userId) => hyperledger.vote(userId, '0'), userIds), [], 'voting'))
         .then(() => timedCall(hyperledger.computeTally, [], "compute tally"))
         .then(console.log, console.log)
 }
@@ -42,6 +42,13 @@ function runFuncParallelForUsers(func, userIds) {
     }
 
     return Promise.all(promises);
+}
+
+function runFuncForUsers(func, userIds) {
+    let index;
+    for (index in userIds) {
+        func(userIds[index])
+    }
 }
 
 runElection();

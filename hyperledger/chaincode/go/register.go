@@ -11,7 +11,7 @@ func (s *SmartContract) register(stub shim.ChaincodeStubInterface, args []string
 	}
 
 	if len(args) != 1 {
-		return shim.Error("Incorrect number of arguments, expecting userId")
+		return shim.Error("Incorrect number of arguments, expecting userID")
 	}
 
 	userID := args[0]
