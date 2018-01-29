@@ -10,7 +10,7 @@ pgrep -f docker > /dev/null || {
 
 mkdir platform-specific-binaries
 cd platform-specific-binaries
-curl -sSL https://raw.githubusercontent.com/hyperledger/fabric/release/scripts/bootstrap-1.0.4.sh | bash
+curl -sSL https://raw.githubusercontent.com/hyperledger/fabric/132daddf1156a0c70429af2e8c3ca86bbdbf8c31/scripts/bootstrap-1.1.0-preview.sh | bash
 export PATH=$(pwd)/bin:$PATH
 echo $PATH
 cd ../

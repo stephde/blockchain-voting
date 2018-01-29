@@ -25,7 +25,6 @@ package main
  */
 import (
 	"fmt"
-	"math/big"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	sc "github.com/hyperledger/fabric/protos/peer"
@@ -38,17 +37,14 @@ type SmartContract struct {
 }
 
 type Voter struct {
-	address          string
-	registeredKey    []big.Int
-	reconstructedKey []big.Int
-	vote             [2]int
+	UserId string
+	Vote   int
 }
 
-// TODO: get from store
-// func getVoter(address string) ([2]int, [2]int) {
-// 	index := addressid[address]
-// 	return voters[index].registeredKey, voters[index].reconstructedKey
-// }
+type Result struct {
+	Voters int
+	Votes  map[int]int
+}
 
 /*
  * Hyperledger Chaincode Interface
@@ -74,7 +70,7 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
 	// Route to the appropriate handler function to interact with the ledger appropriately
 	switch function {
 	case "initVote":
-		return s.initVote(APIstub, args)
+		return s.initVote(APIstub)
 	case "beginSignUp":
 		return s.beginSignUp(APIstub, args)
 	case "submitVote":
@@ -85,26 +81,11 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
 		return s.register(APIstub, args)
 	case "computeTally":
 		return s.computeTally(APIstub)
+	case "question":
+		return s.question(APIstub)
 	default:
-		return shim.Error("Invalid Smart Contract function name.")
+		return shim.Error("Invalid Smart Contract function name: " + function)
 	}
-}
-
-/*
- * Custom functions
- */
-
-func (s *SmartContract) computeTally(stub shim.ChaincodeStubInterface) sc.Response {
-
-	var totalRegistered int
-	GetState(stub, "totalregistered", &totalRegistered)
-
-	// for (i := 0; i < totalRegistered; i++) {
-	// TODO: confirm that all votes have been cast...
-	// }
-
-	return shim.Error("Not implemented yet")
-
 }
 
 // The main function is only relevant in unit test mode. Only included here for completeness.

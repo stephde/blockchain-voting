@@ -5,13 +5,11 @@ import (
 	sc "github.com/hyperledger/fabric/protos/peer"
 )
 
-func (s *SmartContract) initVote(stub shim.ChaincodeStubInterface, args []string) sc.Response {
-	// TODO: What are these two lines good for?
-	// G[0] := Gx
-	// G[1] := Gy
-
+func (s *SmartContract) initVote(stub shim.ChaincodeStubInterface) sc.Response {
 	PutState(stub, "state", SETUP)
-	PutState(stub, "question", "No Question set")
-
+	PutState(stub, "votecast", map[string]bool{})
+	PutState(stub, "eligible", map[string]bool{})
+	PutState(stub, "registered", map[string]bool{})
+	PutState(stub, "totalRegistered", 0)
 	return shim.Success(nil)
 }

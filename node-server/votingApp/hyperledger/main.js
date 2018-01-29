@@ -5,7 +5,6 @@
 let Hyperledger = require("./hyperledger.js");
 let hyperledger = new Hyperledger();
 
-
 function runElection() {
     const numOfUsers = 3;
 
