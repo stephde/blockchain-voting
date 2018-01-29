@@ -3,6 +3,8 @@ let path = require('path');
 let favicon = require('serve-favicon');
 let logger = require('morgan');
 
+let Hyperledger = require('./hyperledger/hyperledger.js')
+
 let app = express();
 
 // uncomment after placing your favicon in /public
@@ -30,6 +32,11 @@ app.get('/:name', function (req, res, next) {
   });
 })
 
+app.post('/voting/setEligible', function(req, res, next) {
+  let hyperledger = new Hyperledger();
+  hyperledger.setEligible(req.body.eligibleUsers)
+});
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   let err = new Error('Not Found');
@@ -45,7 +52,6 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
 });
 
 module.exports = app;
