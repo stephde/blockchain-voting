@@ -31,7 +31,12 @@ func (state StateEnum) String() string {
 func (s *SmartContract) inState(stub shim.ChaincodeStubInterface, expectedState StateEnum) bool {
 	var state StateEnum
 	GetState(stub, "state", &state)
-	return expectedState == state
+	success := expectedState == state
+	if !success {
+		logger.Error("Expected state " + expectedState.String() + ", but was " + state.String())
+	}
+
+	return success
 }
 
 func (s *SmartContract) transitionToState(stub shim.ChaincodeStubInterface, newState StateEnum) {

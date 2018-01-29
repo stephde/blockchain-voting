@@ -7,7 +7,7 @@ import (
 
 func (s *SmartContract) beginSignUp(stub shim.ChaincodeStubInterface, args []string) sc.Response {
 	if !s.inState(stub, SETUP) {
-		return shim.Error("Wrong state")
+		return shim.Error("Wrong state, expected SETUP")
 	}
 
 	if len(args) != 1 {
