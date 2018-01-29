@@ -46,7 +46,7 @@
              <br>
              <button onclick="setEligible()" class="btn btn-secondary">Update eligibility list</button>
           </p>
-		      <p><button onclick="finishEligible()" class="btn btn-primary">Next</button></p>
+		      <!-- <p><button onclick="finishEligible()" class="btn btn-primary">Next</button></p> -->
         </div>
 
         <div id="listoftimers">
@@ -191,51 +191,6 @@ function setInitialTimes() {
 
 }
 
-// function claimUnspentDeposits() {
-//   web3.personal.unlockAccount(addr, password);
-
-//   anonymousvotingAddr.sendToCharity.sendTransaction({from: web3.eth.accounts[accountindex],gas: 4200000});
-//   alert("The charity will receive " + web3.fromWei(anonymousvotingAddr.lostdeposit()) + " ether shortly");
-
-//   return false;
-// }
-
-// function cancelElection() {
-//   web3.personal.unlockAccount(addr, password);
-//   var res = anonymousvotingAddr.deadlinePassed.call({ from: web3.eth.accounts[accountindex], gas: 4200000});
-
-//   if(res) {
-//     anonymousvotingAddr.deadlinePassed.sendTransaction({from: web3.eth.accounts[accountindex],gas: 4200000});
-//     document.getElementById("cancelelectionbutton").setAttribute("disabled",true);
-//     alert("Please wait a few minutes for the election to be cancelled.");
-//   }
-
-//   return false;
-// }
-// function resetElection() {
-
-//   var currentTime = new Date();
-//   var endRefundTime = anonymousvotingAddr.endRefundPhase() * 1000;
-
-//   web3.personal.unlockAccount(addr, password);
-//   var res = anonymousvotingAddr.deadlinePassed.call({ from: web3.eth.accounts[accountindex], gas: 4200000});
-
-//   if(res) {
-//     anonymousvotingAddr.deadlinePassed.sendTransaction({from: web3.eth.accounts[accountindex],gas: 4200000});
-//     document.getElementById('tallydiv').innerHTML = "Please refresh your web browser in a few minutes";
-//   } else {
-
-//     if(currentTime.getTime() < endRefundTime) {
-//       alert("A new vote cannot be started until after " + clockformat(new Date(endRefundTime)));
-//     } else {
-//       alert("Could not restart election" + anonymousvotingAddr.totaltorefund() + " AND " + anonymousvotingAddr.totalrefunded() + " ");
-//     }
-//   }
-
-//   return false;
-// }
-
-
 // Check that the user is eligible to vote
 function setEligible() {
   var eligibleUsers = document.getElementById('addresses').value.split(',')
@@ -244,30 +199,22 @@ function setEligible() {
           type: "POST",
           url: '/voting/setEligible',
           data: {
-            eligibleUsers: eligibleUsers
-        }
+            'eligibleUsers': eligibleUsers
+          }
   });
 }
 
 // Allow people to start submiting their voting key.
 function beginRegistration() {
+  var votingQuestion = document.getElementById('questioninput').value;
 
-  // if(!addressChosen) {
-  //   alert("Please unlock your Ethereum address.");
-  //   return;
-  // }
-
-  state = 0
-
-  if(state != 0) {
-    alert("Please wait until SETUP Phase");
-    return;
-  }
-
-  //hyperledger.setEligible();
-  //hyperledger.queryAll().then(function(results){});
-
-  // call peer
+  $.ajax({
+          type: "POST",
+          url: '/voting/beginSignUp',
+          data: {
+            votingQuestion: votingQuestion
+          }
+  });
 }
 
 function destorypickers() {

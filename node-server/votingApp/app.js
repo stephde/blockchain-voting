@@ -2,8 +2,10 @@ let express = require('express');
 let path = require('path');
 let favicon = require('serve-favicon');
 let logger = require('morgan');
+let bodyParser = require('body-parser');
 
 let Hyperledger = require('./hyperledger/hyperledger.js')
+let hyperledger = new Hyperledger();
 
 let app = express();
 
@@ -11,6 +13,11 @@ let app = express();
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use( bodyParser.json() );       // to support JSON-encoded bodies
+app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+  extended: true
+}));
 
 app.get('/:name', function (req, res, next) {
   var options = {
@@ -32,9 +39,19 @@ app.get('/:name', function (req, res, next) {
   });
 })
 
+app.post('/voting/initVote', function(req, res, next) {
+  hyperledger.initVote();
+});
+
 app.post('/voting/setEligible', function(req, res, next) {
-  let hyperledger = new Hyperledger();
-  hyperledger.setEligible(req.body.eligibleUsers)
+  hyperledger.setEligible(req.body.eligibleUsers);
+});
+
+app.post('/voting/beginSignUp', function(req, res, next) {
+  // for simplicity: do initVote and beginSignUp in one ajax call
+  hyperledger.initVote();
+
+  hyperledger.beginSignUp(req.body.votingQuestion);
 });
 
 // catch 404 and forward to error handler
