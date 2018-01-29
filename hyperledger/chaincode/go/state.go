@@ -10,7 +10,8 @@ import (
 type StateEnum int
 
 const (
-	SETUP StateEnum = iota
+	UNSET StateEnum = iota
+	SETUP
 	SIGNUP
 	VOTE
 	FINISHED
@@ -30,8 +31,6 @@ func (state StateEnum) String() string {
 func (s *SmartContract) inState(stub shim.ChaincodeStubInterface, expectedState StateEnum) bool {
 	var state StateEnum
 	GetState(stub, "state", &state)
-
-	logger.Info("State is " + state.String())
 	return expectedState == state
 }
 

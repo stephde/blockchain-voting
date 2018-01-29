@@ -24,9 +24,7 @@ package main
  * 2 specific Hyperledger Fabric specific libraries for Smart Contracts
  */
 import (
-	"crypto/ecdsa"
 	"fmt"
-	"math/big"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	sc "github.com/hyperledger/fabric/protos/peer"
@@ -39,10 +37,13 @@ type SmartContract struct {
 }
 
 type Voter struct {
-	address          string
-	registeredKey    *ecdsa.PublicKey
-	reconstructedKey *ecdsa.PublicKey
-	vote             []*big.Int
+	UserId string
+	Vote   int
+}
+
+type Result struct {
+	Voters int
+	Votes  map[int]int
 }
 
 /*
@@ -69,7 +70,7 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
 	// Route to the appropriate handler function to interact with the ledger appropriately
 	switch function {
 	case "initVote":
-		return s.initVote(APIstub, args)
+		return s.initVote(APIstub)
 	case "beginSignUp":
 		return s.beginSignUp(APIstub, args)
 	case "submitVote":
