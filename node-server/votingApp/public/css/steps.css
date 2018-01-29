@@ -122,6 +122,7 @@ body {
 }
 /*progressbars*/
 #progressbar {
+	margin-left: 200px;
 	margin-bottom: 50px;
 	overflow: hidden;
 	/*CSS counters to number the steps*/
