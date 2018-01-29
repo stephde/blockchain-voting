@@ -7,8 +7,7 @@ import (
 )
 
 func Test_Question(t *testing.T) {
-	scc := new(SmartContract)
-	stub := shim.NewMockStub("test_question", scc)
+	stub := shim.NewMockStub("test_question", new(SmartContract))
 
 	question := "What is the question?"
 	stub.MockTransactionStart("t123")

@@ -8,9 +8,7 @@ import (
 )
 
 func Test_SetEligible(t *testing.T) {
-
-	scc := new(SmartContract)
-	stub := shim.NewMockStub("test_setEligible", scc)
+	stub := shim.NewMockStub("test_setEligible", new(SmartContract))
 
 	checkInvoke(t, stub, [][]byte{
 		[]byte("setEligible"),

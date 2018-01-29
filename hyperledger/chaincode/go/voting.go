@@ -70,7 +70,7 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
 	// Route to the appropriate handler function to interact with the ledger appropriately
 	switch function {
 	case "initVote":
-		return s.initVote(APIstub, args)
+		return s.initVote(APIstub)
 	case "beginSignUp":
 		return s.beginSignUp(APIstub, args)
 	case "submitVote":

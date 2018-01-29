@@ -51,13 +51,15 @@ func checkInvoke(t *testing.T, stub *shim.MockStub, args [][]byte) {
 	}
 }
 
-func Test_InvalidFunctionName(t *testing.T) {
-	scc := new(SmartContract)
-	stub := shim.NewMockStub("test_invalid_question", scc)
-
-	res := stub.MockInvoke("1", [][]byte{[]byte("someInvalidFunction")})
+func checkFailingInvoke(t *testing.T, stub *shim.MockStub, args [][]byte) {
+	res := stub.MockInvoke("1", args)
 	if res.Status != shim.ERROR {
-		fmt.Println("Query test_question succeeded", string(res.Message))
+		fmt.Println("Invoke", args, "succeeded", string(res.Message))
 		t.FailNow()
 	}
+}
+
+func Test_InvalidFunctionName(t *testing.T) {
+	stub := shim.NewMockStub("test_invalid_question", new(SmartContract))
+	checkFailingInvoke(t, stub, [][]byte{[]byte("someInvalidFunction")})
 }

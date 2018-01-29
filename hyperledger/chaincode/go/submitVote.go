@@ -31,12 +31,11 @@ func (s *SmartContract) submitVote(stub shim.ChaincodeStubInterface, args []stri
 	value1, found1 := registered[userID]
 	value2, found2 := votecast[userID]
 
-	logger.Info("User is registered? ", found1)
-	logger.Info("User has voted? ", value2)
+	logger.Debug("User is registered? ", found1)
+	logger.Debug("User has voted? ", value2)
 
 	if found1 && found2 && value1 && !value2 {
 		// User is registered and did not cast vote yet
-		logger.Info("User is allowed to vote")
 		var voters map[string]Voter
 		GetState(stub, "voters", &voters)
 		voter := voters[userID]

@@ -10,6 +10,10 @@ func (s *SmartContract) beginSignUp(stub shim.ChaincodeStubInterface, args []str
 		return shim.Error("Wrong state")
 	}
 
+	if len(args) != 1 {
+		return shim.Error("Expected one argument: question")
+	}
+
 	question := args[0]
 	PutState(stub, "question", question)
 	s.transitionToState(stub, SIGNUP)

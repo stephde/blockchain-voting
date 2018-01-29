@@ -8,21 +8,37 @@ import (
 )
 
 func Test_BeginSignup(t *testing.T) {
+	stub := shim.NewMockStub("test_beginSignup", new(SmartContract))
 
-	scc := new(SmartContract)
-	stub := shim.NewMockStub("test_beginSignup", scc)
+	question := "What is the question?"
 
 	stub.MockTransactionStart("t123")
 	PutState(stub, "state", SETUP)
 	stub.MockTransactionEnd("t123")
 
-	checkInvoke(t, stub, [][]byte{[]byte("beginSignUp"), []byte("This is a question!")})
+	checkInvoke(t, stub, [][]byte{[]byte("beginSignUp"), []byte(question)})
 
 	var state StateEnum
 	GetState(stub, "state", &state)
 	assert.Equal(t, SIGNUP, state)
 
-	var question string
-	GetState(stub, "question", &question)
-	assert.Equal(t, "This is a question!", question)
+	var questionFromState string
+	GetState(stub, "question", &questionFromState)
+	assert.Equal(t, question, questionFromState)
+}
+
+func Test_MissingQuestion(t *testing.T) {
+	stub := shim.NewMockStub("test_missing_question", new(SmartContract))
+	stub.MockTransactionStart("t123")
+	PutState(stub, "state", SETUP)
+	stub.MockTransactionEnd("t123")
+
+	checkFailingInvoke(t, stub, [][]byte{[]byte("beginSignUp")})
+}
+
+func Test_WrongState(t *testing.T) {
+	stub := shim.NewMockStub("Test_WrongState", new(SmartContract))
+
+	question := "What is the question?"
+	checkFailingInvoke(t, stub, [][]byte{[]byte("beginSignUp"), []byte(question)})
 }

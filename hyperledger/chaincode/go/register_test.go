@@ -8,9 +8,7 @@ import (
 )
 
 func Test_Register(t *testing.T) {
-
-	scc := new(SmartContract)
-	stub := shim.NewMockStub("test_register", scc)
+	stub := shim.NewMockStub("test_register", new(SmartContract))
 
 	userID := "userId"
 

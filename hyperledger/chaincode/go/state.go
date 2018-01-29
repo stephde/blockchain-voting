@@ -10,7 +10,8 @@ import (
 type StateEnum int
 
 const (
-	SETUP StateEnum = iota
+	UNSET StateEnum = iota
+	SETUP
 	SIGNUP
 	VOTE
 	FINISHED

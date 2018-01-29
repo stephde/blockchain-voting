@@ -8,9 +8,7 @@ import (
 )
 
 func Test_InitVote(t *testing.T) {
-
-	scc := new(SmartContract)
-	stub := shim.NewMockStub("test_beginSignup", scc)
+	stub := shim.NewMockStub("testInitVote", new(SmartContract))
 
 	checkInvoke(t, stub, [][]byte{[]byte("initVote")})
 

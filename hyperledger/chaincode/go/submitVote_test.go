@@ -8,9 +8,7 @@ import (
 )
 
 func Test_SubmitVote(t *testing.T) {
-
-	scc := new(SmartContract)
-	stub := shim.NewMockStub("test_submitVote", scc)
+	stub := shim.NewMockStub("test_submitVote", new(SmartContract))
 
 	stub.MockTransactionStart("t123")
 	PutState(stub, "state", VOTE)

@@ -32,11 +32,7 @@ func (s *SmartContract) computeTally(stub shim.ChaincodeStubInterface) sc.Respon
 			return shim.Error("Voter " + voterAddress + " has not voted")
 		}
 
-		vote := voter.Vote
-		logger.Info(vote)
-
-		tempResult[vote]++
-
+		tempResult[voter.Vote]++
 	}
 
 	finalTally := Result{totalRegistered, tempResult}
