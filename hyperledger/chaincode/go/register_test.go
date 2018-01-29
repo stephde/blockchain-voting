@@ -20,6 +20,8 @@ func Test_Register(t *testing.T) {
 	PutState(stub, "eligible", eligible)
 	registered := map[string]bool{userID: false}
 	PutState(stub, "registered", registered)
+	voters := map[string]Voter{}
+	PutState(stub, "voters", voters)
 	stub.MockTransactionEnd("t124")
 
 	checkInvoke(t, stub, [][]byte{
@@ -34,8 +36,8 @@ func Test_Register(t *testing.T) {
 	GetState(stub, "registered", &registered)
 	assert.True(t, registered[userID])
 
-	var voters []Voter
 	GetState(stub, "voters", &voters)
 	assert.Equal(t, 1, len(voters))
-	assert.Equal(t, userID, voters[0].UserId)
+	_, found := voters[userID]
+	assert.True(t, found)
 }

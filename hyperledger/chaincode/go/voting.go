@@ -43,7 +43,7 @@ type Voter struct {
 
 type Result struct {
 	Voters int
-	Votes  []int
+	Votes  map[int]int
 }
 
 /*

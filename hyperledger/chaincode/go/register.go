@@ -36,9 +36,9 @@ func (s *SmartContract) register(stub shim.ChaincodeStubInterface, args []string
 		totalRegistered = totalRegistered + 1
 		PutState(stub, "totalRegistered", totalRegistered)
 
-		var voters []Voter
+		var voters map[string]Voter
 		GetState(stub, "voters", &voters)
-		voters = append(voters, voter)
+		voters[userID] = voter
 		PutState(stub, "voters", voters)
 	}
 

@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	sc "github.com/hyperledger/fabric/protos/peer"
@@ -21,12 +20,10 @@ func (s *SmartContract) computeTally(stub shim.ChaincodeStubInterface) sc.Respon
 	GetState(stub, "voters", &voters)
 
 	// Initialize all results with 0
-	tempResult := []int{0}
+	tempResult := map[int]int{}
 
 	// Sum all votes
 	for voterAddress, voter := range voters {
-		fmt.Printf("key[%s] value[%s]\n", voterAddress, voter)
-
 		var votecast map[string]bool
 		GetState(stub, "votecast", &votecast)
 
