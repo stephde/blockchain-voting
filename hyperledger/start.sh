@@ -19,7 +19,7 @@ docker rm -f $(docker ps -aq) || true
 
 # Start Docker containers
 docker-compose -f docker-compose.yml down
-docker-compose -f docker-compose.yml up -d ca.example.com orderer.example.com peer0.org1.example.com couchdb
+docker-compose -f docker-compose.yml up -d ca.example.com orderer.example.com peer0.org1.example.com couchdb peer1 peer2 peer3
 
 # wait for Hyperledger Fabric to start
 # in case of errors when running later commands, issue export FABRIC_START_TIMEOUT=<larger number>
@@ -32,6 +32,10 @@ docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/etc/h
 # Join peer0.org1.example.com to the channel.
 printf "\n############### Joining peer to the channel\n"
 docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@org1.example.com/msp" peer0.org1.example.com peer channel join -b mychannel.block
+printf "\n############### Joining peer 2 to the channel\n"
+docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@org1.example.com/msp" -e "CORE_PEER_ADDRESS=peer1:7151" peer1 peer channel join -b mychannel.block
+docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@org1.example.com/msp" -e "CORE_PEER_ADDRESS=peer1:7251" peer2 peer channel join -b mychannel.block
+docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@org1.example.com/msp" -e "CORE_PEER_ADDRESS=peer1:7351" peer3 peer channel join -b mychannel.block
 
 # Now launch the CLI container in order to install, instantiate chaincode
 docker-compose -f ./docker-compose.yml up -d cli
