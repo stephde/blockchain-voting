@@ -7,7 +7,7 @@ import (
 
 func (s *SmartContract) register(stub shim.ChaincodeStubInterface, args []string) sc.Response {
 	if !s.inState(stub, SIGNUP) {
-		return shim.Error("Wrong state")
+		return shim.Error("Wrong state, expected SIGNUP")
 	}
 
 	if len(args) != 1 {
@@ -33,7 +33,7 @@ func (s *SmartContract) register(stub shim.ChaincodeStubInterface, args []string
 
 		var totalRegistered int
 		GetState(stub, "totalRegistered", &totalRegistered)
-		totalRegistered = totalRegistered + 1
+		totalRegistered++
 		PutState(stub, "totalRegistered", totalRegistered)
 
 		var voters map[string]Voter

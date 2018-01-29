@@ -26,7 +26,7 @@ Hyperledger = function(){
   }
 
   _this.registerUser = function(user) {
-    return registration.registerUser(_this.client, user.id);
+    return registration.registerUser(_this.client, user.id, defaultUserId);
   }
 
   _this.getUser = function (userId) {
@@ -35,43 +35,48 @@ Hyperledger = function(){
   }
 
   _this.enrollAdmin = function() {
-    return enroll.enrollAdmin(_this.client);
+    return enroll.enrollAdmin(_this.client, defaultUserId);
   }
 
   _this.initVote = function () {
       console.log("Initializing the vote...")
-      return invoke.invokeTransaction(_this.client, _this.channel, 'initVote', [])
+      return invoke.invokeTransaction(_this.client, _this.channel, 'initVote', [], defaultUserId)
   }
 
   // beginSignUp requires initVote to have been called before
   _this.beginSignUp = function (question) {
       console.log("Starting Sign-Up phase...")
-      return invoke.invokeTransaction(_this.client, _this.channel, 'beginSignUp', [question])
+      return invoke.invokeTransaction(_this.client, _this.channel, 'beginSignUp', [question], defaultUserId)
+  }
+
+  _this.finishRegistrationPhase = function () {
+      console.log("Finishing registration phase, starting Vote phase...")
+      return invoke.invokeTransaction(_this.client, _this.channel, 'finishRegistrationPhase', [], defaultUserId)
   }
 
   _this.setEligible = function (userIds) {
       console.log("Setting eligible voters to: \n" + userIds)
-      return invoke.invokeTransaction(_this.client, _this.channel, 'setEligible', userIds)
+      return invoke.invokeTransaction(_this.client, _this.channel, 'setEligible', userIds, defaultUserId)
   }
 
   _this.registerForVote = function (userId) {
       //ToDo: is the userId implicit?
       console.log("Registering user - " + userId + " - for vote...")
       //ToDo: what is up with the arguments? and what is the 4th argument?
-      return invoke.invokeTransaction(_this.client, _this.channel, 'setEligible', ['xG', 'vG', 'r'])
+      return invoke.invokeTransaction(_this.client, _this.channel, 'register', [userId], defaultUserId)
   }
 
   _this.computeTally = function () {
       console.log("Computing the tally...")
       //ToDo: is this a query or an invocation?
-      return invoke.invokeTransaction(_this.client, _this.channel, 'computeTally', [])
+      return invoke.invokeTransaction(_this.client, _this.channel, 'computeTally', [], defaultUserId)
   }
 
-  _this.vote = function(selectedOption) {
+  _this.vote = function(userId, selectedOption) {
     invoke.invokeTransaction(_this.client,
       _this.channel,
-      'vote', //transaction function
-      [selectedOption],
+      'submitVote', //transaction function
+      [userId, selectedOption],
       defaultUserId);
   }
 

@@ -9,7 +9,7 @@ import (
 
 func (s *SmartContract) submitVote(stub shim.ChaincodeStubInterface, args []string) sc.Response {
 	if !s.inState(stub, VOTE) {
-		return shim.Error("Wrong state")
+		return shim.Error("Wrong state, expected VOTE")
 	}
 
 	if len(args) != 2 {
@@ -31,19 +31,20 @@ func (s *SmartContract) submitVote(stub shim.ChaincodeStubInterface, args []stri
 	value1, found1 := registered[userID]
 	value2, found2 := votecast[userID]
 
-	logger.Debug("User is registered? ", found1)
-	logger.Debug("User has voted? ", value2)
-
-	if found1 && found2 && value1 && !value2 {
-		// User is registered and did not cast vote yet
-		var voters map[string]Voter
-		GetState(stub, "voters", &voters)
-		voter := voters[userID]
-		voter.Vote = vote
-		PutState(stub, "voters", voters)
-
-		return shim.Success(nil)
-	} else {
-		return shim.Error("User is not allowed to vote")
+	if !found1 || !found2 || !value1 || value2 {
+		return shim.Error(userID + " is not allowed to vote")
 	}
+
+	// User is registered and did not cast vote yet
+	var voters map[string]Voter
+	GetState(stub, "voters", &voters)
+	voter := voters[userID]
+	voter.Vote = vote
+	voters[userID] = voter
+	PutState(stub, "voters", voters)
+
+	votecast[userID] = true
+	PutState(stub, "votecast", votecast)
+
+	return shim.Success(nil)
 }

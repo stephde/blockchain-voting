@@ -73,6 +73,8 @@ func (s *SmartContract) Invoke(APIstub shim.ChaincodeStubInterface) sc.Response 
 		return s.initVote(APIstub)
 	case "beginSignUp":
 		return s.beginSignUp(APIstub, args)
+	case "finishRegistrationPhase":
+		return s.finishRegistrationPhase(APIstub)
 	case "submitVote":
 		return s.submitVote(APIstub, args)
 	case "setEligible":

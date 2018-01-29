@@ -10,11 +10,11 @@ import (
 func (s *SmartContract) computeTally(stub shim.ChaincodeStubInterface) sc.Response {
 
 	if !s.inState(stub, VOTE) {
-		return shim.Error("Wrong state")
+		return shim.Error("Wrong state, expected VOTE")
 	}
 
 	var totalRegistered int
-	GetState(stub, "totalregistered", &totalRegistered)
+	GetState(stub, "totalRegistered", &totalRegistered)
 
 	var voters map[string]Voter
 	GetState(stub, "voters", &voters)

@@ -10,6 +10,10 @@ import (
 func Test_SetEligible(t *testing.T) {
 	stub := shim.NewMockStub("test_setEligible", new(SmartContract))
 
+	stub.MockTransactionStart("t123")
+	PutState(stub, "state", SETUP)
+	stub.MockTransactionEnd("t123")
+
 	checkInvoke(t, stub, [][]byte{
 		[]byte("setEligible"),
 		[]byte("a"),

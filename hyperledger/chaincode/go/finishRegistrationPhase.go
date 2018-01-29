@@ -7,7 +7,7 @@ import (
 
 func (s *SmartContract) finishRegistrationPhase(stub shim.ChaincodeStubInterface) sc.Response {
 	if !s.inState(stub, SIGNUP) {
-		return shim.Error("Wrong state")
+		return shim.Error("Wrong state, expected SIGNUP")
 	}
 
 	var totalRegistered int
@@ -16,6 +16,19 @@ func (s *SmartContract) finishRegistrationPhase(stub shim.ChaincodeStubInterface
 		// Legacy from Anonymous Voting Protocol
 		return shim.Error("Too few voters registered, need at least 3")
 	}
+
+	var registered map[string]bool
+	GetState(stub, "registered", &registered)
+
+	votecast := map[string]bool{}
+
+	for voterUserID, registered := range registered {
+		if registered {
+			votecast[voterUserID] = false
+		}
+	}
+
+	PutState(stub, "votecast", votecast)
 
 	// Now we either enter the voting phase.
 	s.transitionToState(stub, VOTE)

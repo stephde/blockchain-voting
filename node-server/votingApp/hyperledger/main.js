@@ -17,8 +17,9 @@ function runElection() {
         .then(() => timedCall(hyperledger.initVote, [], 'Init Vote'))
         .then(() => timedCall(hyperledger.setEligible, userIds, 'Set Eligible'))
         .then(() => timedCall(hyperledger.beginSignUp, "Do you like Blockchain?", 'begin sign up'))
-        .then(() => timedCall(()=>runFuncParallelForUsers((userId) => hyperledger.registerForVote(userId), userIds), [], 'register for vote'))
-        //ToDo: add voting step
+        .then(() => timedCall(() => runFuncParallelForUsers((userId) => hyperledger.registerForVote(userId), userIds), [], 'register for vote'))
+        .then(() => timedCall(hyperledger.finishRegistrationPhase, [], 'finishRegistrationPhase'))
+        .then(() => timedCall(() => runFuncParallelForUsers((userId) => hyperledger.vote(userId, 0), userIds), [], 'voting'))
         .then(() => timedCall(hyperledger.computeTally, [], "compute tally"))
         .then(console.log, console.log)
 }
