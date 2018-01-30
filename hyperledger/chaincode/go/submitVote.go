@@ -37,7 +37,10 @@ func (s *SmartContract) submitVote(stub shim.ChaincodeStubInterface, args []stri
 	hasVoted := deltaResultsIterator.HasNext()
 
 	if !found1 || hasVoted {
-		return shim.Error(userID + " is not allowed to vote")
+		if !found1 {
+			return shim.Error(userID + " is not allowed to vote - not registered")
+		}
+		return shim.Error(userID + " is not allowed to vote - already voted")
 	}
 
 	// TODO: userID could be voting key and vote could be ZKP encrypted
