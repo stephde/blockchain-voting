@@ -1,7 +1,7 @@
 package main
 
 import (
-	"strconv"
+	"fmt"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	sc "github.com/hyperledger/fabric/protos/peer"
@@ -16,35 +16,52 @@ func (s *SmartContract) submitVote(stub shim.ChaincodeStubInterface, args []stri
 		return shim.Error("Expecting two arguments: UserID and Vote")
 	}
 
+	txid := stub.GetTxID()
 	userID := args[0]
-	vote, err := strconv.Atoi(args[1])
-	if err != nil {
-		return shim.Error("Vote was non-readable int")
-	}
+	vote := args[1]
 
 	// Make sure the sender can vote and hasn't already voted
-	var registered map[string]bool
-	var votecast map[string]bool
+	var registered map[string]struct{}
 	GetState(stub, "registered", &registered)
-	GetState(stub, "votecast", &votecast)
 
-	value1, found1 := registered[userID]
-	value2, found2 := votecast[userID]
+	votecastCompositeIndex := "varName~userID~txID"
+	name := "vote"
 
-	if !found1 || !found2 || !value1 || value2 {
+	deltaResultsIterator, deltaErr := stub.GetStateByPartialCompositeKey(votecastCompositeIndex, []string{"votecast", userID})
+	if deltaErr != nil {
+		return shim.Error(fmt.Sprintf("Could not retrieve value for %s: %s", name, deltaErr.Error()))
+	}
+	defer deltaResultsIterator.Close()
+
+	_, found1 := registered[userID]
+	hasVoted := deltaResultsIterator.HasNext()
+
+	if !found1 || hasVoted {
 		return shim.Error(userID + " is not allowed to vote")
 	}
 
-	// User is registered and did not cast vote yet
-	var voters map[string]Voter
-	GetState(stub, "voters", &voters)
-	voter := voters[userID]
-	voter.Vote = vote
-	voters[userID] = voter
-	PutState(stub, "voters", voters)
+	// TODO: userID could be voting key and vote could be ZKP encrypted
+	compositeIndexName := "varName~userID~vote~txID"
+	compositeKey, compositeErr := stub.CreateCompositeKey(compositeIndexName, []string{name, userID, vote, txid})
+	if compositeErr != nil {
+		return shim.Error(fmt.Sprintf("Could not create a composite key for %s: %s", name, compositeErr.Error()))
+	}
 
-	votecast[userID] = true
-	PutState(stub, "votecast", votecast)
+	// User is registered and did not cast vote yet
+	compositePutErr := stub.PutState(compositeKey, []byte{0x00})
+	if compositePutErr != nil {
+		return shim.Error(fmt.Sprintf("Could not put operation for %s in the ledger: %s", name, compositePutErr.Error()))
+	}
+
+	// Saving votecast
+	votecastCompositeKey, votecastCompositeErr := stub.CreateCompositeKey(votecastCompositeIndex, []string{"votecast", userID, txid})
+	if votecastCompositeErr != nil {
+		return shim.Error(fmt.Sprintf("Could not create a composite key for %s: %s", "votecast", votecastCompositeErr.Error()))
+	}
+	compositePutErr = stub.PutState(votecastCompositeKey, []byte{0x00})
+	if compositePutErr != nil {
+		return shim.Error(fmt.Sprintf("Could not put operation for %s in the ledger: %s", "votecast", compositePutErr.Error()))
+	}
 
 	return shim.Success(nil)
 }

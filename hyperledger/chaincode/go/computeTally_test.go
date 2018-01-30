@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"strconv"
 	"testing"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
@@ -13,10 +14,14 @@ func Test_ComputeTally(t *testing.T) {
 	stub.MockTransactionStart("t123")
 	PutState(stub, "state", VOTE)
 	PutState(stub, "totalRegistered", 2)
-	voters := map[string]Voter{"1": Voter{"1", 0}, "2": Voter{"2", 1}}
-	PutState(stub, "voters", voters)
-	votecast := map[string]bool{"1": true, "2": true}
-	PutState(stub, "votecast", votecast)
+	compositeIndexName := "varName~userID~vote~txID"
+
+	var i int
+	for i = 0; i < 2; i++ {
+		compositeKey, _ := stub.CreateCompositeKey(compositeIndexName, []string{"vote", strconv.Itoa(i), strconv.Itoa(i), strconv.Itoa(1)})
+		stub.PutState(compositeKey, []byte{0x00})
+	}
+
 	stub.MockTransactionEnd("t123")
 
 	result := Result{2, map[int]int{0: 1, 1: 1}}

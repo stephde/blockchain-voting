@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"strconv"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	sc "github.com/hyperledger/fabric/protos/peer"
@@ -16,23 +18,47 @@ func (s *SmartContract) computeTally(stub shim.ChaincodeStubInterface) sc.Respon
 	var totalRegistered int
 	GetState(stub, "totalRegistered", &totalRegistered)
 
-	var voters map[string]Voter
-	GetState(stub, "voters", &voters)
-
 	// Initialize all results with 0
 	tempResult := map[int]int{}
 
-	// Sum all votes
-	for voterAddress, voter := range voters {
-		var votecast map[string]bool
-		GetState(stub, "votecast", &votecast)
+	compositeIndexName := "varName~userID~vote~txID"
+	name := "vote"
+	deltaResultsIterator, deltaErr := stub.GetStateByPartialCompositeKey(compositeIndexName, []string{name})
+	if deltaErr != nil {
+		return shim.Error(fmt.Sprintf("Could not retrieve value for %s: %s", name, deltaErr.Error()))
+	}
+	defer deltaResultsIterator.Close()
+	// Check the variable existed
+	if !deltaResultsIterator.HasNext() {
+		return shim.Error(fmt.Sprintf("No variable by the name %s exists", name))
+	}
 
-		value, found := votecast[voterAddress]
-		if found && !value {
-			return shim.Error("Voter " + voterAddress + " has not voted")
+	// Sum all votes
+	var i int
+	for i = 0; deltaResultsIterator.HasNext(); i++ {
+		// Get the next row
+		responseRange, nextErr := deltaResultsIterator.Next()
+		if nextErr != nil {
+			return shim.Error(nextErr.Error())
 		}
 
-		tempResult[voter.Vote]++
+		// Split the composite key into its component parts
+		_, keyParts, splitKeyErr := stub.SplitCompositeKey(responseRange.Key)
+		if splitKeyErr != nil {
+			return shim.Error(splitKeyErr.Error())
+		}
+
+		// Retrieve the delta value and operation
+		// userID := keyParts[1]
+		vote, _ := strconv.Atoi(keyParts[2])
+
+		tempResult[vote]++
+	}
+
+	if i < totalRegistered {
+		return shim.Error("Someone did not vote")
+	} else if i > totalRegistered {
+		return shim.Error("Someone vote multiple times")
 	}
 
 	finalTally := Result{totalRegistered, tempResult}
