@@ -18,20 +18,11 @@ func Test_SubmitVote(t *testing.T) {
 	registered := map[string]bool{userID: true}
 	PutState(stub, "registered", registered)
 
-	votecast := map[string]bool{userID: false}
-	PutState(stub, "votecast", votecast)
-
-	PutState(stub, "voters", map[string]Voter{})
-	stub.MockTransactionEnd("t123")
-
 	checkInvoke(t, stub, [][]byte{[]byte("submitVote"), []byte(userID), []byte(strconv.Itoa(1))})
 
-	GetState(stub, "votecast", &votecast)
-	assert.True(t, votecast[userID])
-
-	var voters map[string]Voter
-	GetState(stub, "voters", &voters)
-	assert.Equal(t, 1, voters[userID].Vote)
+	name := "vote"
+	deltaResultsIterator, _ := stub.GetStateByPartialCompositeKey("varName~userID~vote~txID", []string{name, userID})
+	assert.True(t, deltaResultsIterator.HasNext())
 }
 
 func Test_InvalidUserID(t *testing.T) {
@@ -54,8 +45,8 @@ func Test_DuplicateVote(t *testing.T) {
 	registered := map[string]bool{userID: true}
 	PutState(stub, "registered", registered)
 
-	votecast := map[string]bool{userID: true}
-	PutState(stub, "votecast", votecast)
+	votecastCompositeKey, _ := stub.CreateCompositeKey("varName~userID~txID", []string{"votecast", userID, "1"})
+	PutState(stub, votecastCompositeKey, []byte{0x00})
 	stub.MockTransactionEnd("t123")
 
 	checkFailingInvoke(t, stub, [][]byte{[]byte("submitVote"), []byte(userID), []byte(strconv.Itoa(1))})
