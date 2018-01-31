@@ -6,7 +6,7 @@ let Hyperledger = require("./hyperledger.js");
 let hyperledger = new Hyperledger();
 
 function runElection() {
-    const numOfUsers = 50;
+    const numOfUsers = 5;
 
     let userIds = []
     for (let i=0; i < numOfUsers; i++) {
@@ -24,9 +24,10 @@ function runElection() {
         .then(() => timedCall(() =>
             runFuncParallelForUsers(
                 (userId) => hyperledger.vote(userId, '1'), userIds), [], 'voting'))
-        .then(() => promisedTimeout(5000))
+        .then(() => promisedTimeout(2000))
         .then(() => timedCall(hyperledger.computeTally, [], "compute tally"))
-        .then(console.log)
+        .then(() => promisedTimeout(2000))
+        .then(() => hyperledger.close())
         .catch(console.log)
 }
 
@@ -44,7 +45,7 @@ async function runFuncParallelForUsers(func, userIds) {
 
     let index;
     for (index in userIds) {
-        await promisedTimeout(200)
+        //await promisedTimeout(100)
         promises.push(func(userIds[index]))
     }
 

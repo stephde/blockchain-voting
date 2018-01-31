@@ -1,5 +1,5 @@
 
-Hyperledger = function(){
+Hyperledger = function() {
     let initClient = require("./initFabricClient.js"),
         query = require("./query.js"),
         registration = require("./registerUser.js"),
@@ -18,6 +18,7 @@ Hyperledger = function(){
     _this.hlAdapter = initClient.initFabricClient(host, channelId);
     _this.channel = _this.hlAdapter.channel;
     _this.client = _this.hlAdapter.client;
+    _this.eventHub = _this.hlAdapter.eventHub;
     return this;
   }
 
@@ -40,29 +41,33 @@ Hyperledger = function(){
 
   _this.initVote = function () {
       console.log("Initializing the vote...")
-      return invoke.invokeTransaction(_this.client, _this.channel, 'initVote', [], defaultUserId)
+      return invoke.invokeTransaction(_this.client, _this.channel,
+          _this.eventHub, 'initVote', [], defaultUserId)
   }
 
   // beginSignUp requires initVote to have been called before
   _this.beginSignUp = function (question) {
       console.log("Starting Sign-Up phase...")
-      return invoke.invokeTransaction(_this.client, _this.channel, 'beginSignUp', [question], defaultUserId)
+      return invoke.invokeTransaction(_this.client, _this.channel, _this.eventHub, 'beginSignUp', [question], defaultUserId)
   }
 
   _this.finishRegistrationPhase = function () {
       console.log("Finishing registration phase, starting Vote phase...")
-      return invoke.invokeTransaction(_this.client, _this.channel, 'finishRegistrationPhase', [], defaultUserId)
+      return invoke.invokeTransaction(_this.client, _this.channel,
+          _this.eventHub, 'finishRegistrationPhase', [], defaultUserId)
   }
 
   _this.setEligible = function (userIds) {
       console.log("Setting eligible voters to: \n" + userIds)
-      return invoke.invokeTransaction(_this.client, _this.channel, 'setEligible', userIds, defaultUserId)
+      return invoke.invokeTransaction(_this.client, _this.channel,
+          _this.eventHub, 'setEligible', userIds, defaultUserId)
   }
 
   _this.registerForVote = function (userId) {
       //ToDo: is the userId implicit?
       console.log("Registering user - " + userId + " - for vote...")
-      return invoke.invokeTransaction(_this.client, _this.channel, 'register', [userId], defaultUserId)
+      return invoke.invokeTransaction(_this.client, _this.channel,
+          _this.eventHub, 'register', [userId], defaultUserId)
   }
 
   _this.computeTally = function () {
@@ -71,11 +76,16 @@ Hyperledger = function(){
   }
 
   _this.vote = function(userId, selectedOption) {
-    invoke.invokeTransaction(_this.client,
+    return invoke.invokeTransaction(_this.client,
       _this.channel,
+      _this.eventHub,
       'submitVote', //transaction function
       [userId, selectedOption],
       defaultUserId);
+  }
+
+  _this.close = function () {
+      _this.eventHub.disconnect();
   }
 
   init();
