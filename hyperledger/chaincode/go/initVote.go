@@ -30,7 +30,7 @@ func (s *SmartContract) deleteCompositeKey(stub shim.ChaincodeStubInterface, com
 
 	// Ensure the variable exists
 	if !deltaResultsIterator.HasNext() {
-		return shim.Error(fmt.Sprintf("No variable by the name %s exists", name))
+		return shim.Success([]byte(fmt.Sprintf("Variable %s already deleted", name)))
 	}
 
 	// Iterate through result set and delete all indices
