@@ -25,11 +25,11 @@ func (s *SmartContract) submitVote(stub shim.ChaincodeStubInterface, args []stri
 	GetState(stub, "registered", &registered)
 
 	votecastCompositeIndex := "varName~userID~txID"
-	name := "vote"
+	votecastName := "votecast"
 
-	deltaResultsIterator, deltaErr := stub.GetStateByPartialCompositeKey(votecastCompositeIndex, []string{"votecast", userID})
+	deltaResultsIterator, deltaErr := stub.GetStateByPartialCompositeKey(votecastCompositeIndex, []string{votecastName, userID})
 	if deltaErr != nil {
-		return shim.Error(fmt.Sprintf("Could not retrieve value for %s: %s", name, deltaErr.Error()))
+		return shim.Error(fmt.Sprintf("Could not retrieve value for %s: %s", votecastName, deltaErr.Error()))
 	}
 	defer deltaResultsIterator.Close()
 
@@ -45,6 +45,7 @@ func (s *SmartContract) submitVote(stub shim.ChaincodeStubInterface, args []stri
 
 	// TODO: userID could be voting key and vote could be ZKP encrypted
 	compositeIndexName := "varName~userID~vote~txID"
+	name := "vote"
 	compositeKey, compositeErr := stub.CreateCompositeKey(compositeIndexName, []string{name, userID, vote, txid})
 	if compositeErr != nil {
 		return shim.Error(fmt.Sprintf("Could not create a composite key for %s: %s", name, compositeErr.Error()))
@@ -57,13 +58,13 @@ func (s *SmartContract) submitVote(stub shim.ChaincodeStubInterface, args []stri
 	}
 
 	// Saving votecast
-	votecastCompositeKey, votecastCompositeErr := stub.CreateCompositeKey(votecastCompositeIndex, []string{"votecast", userID, txid})
+	votecastCompositeKey, votecastCompositeErr := stub.CreateCompositeKey(votecastCompositeIndex, []string{votecastName, userID, txid})
 	if votecastCompositeErr != nil {
-		return shim.Error(fmt.Sprintf("Could not create a composite key for %s: %s", "votecast", votecastCompositeErr.Error()))
+		return shim.Error(fmt.Sprintf("Could not create a composite key for %s: %s", votecastName, votecastCompositeErr.Error()))
 	}
 	compositePutErr = stub.PutState(votecastCompositeKey, []byte{0x00})
 	if compositePutErr != nil {
-		return shim.Error(fmt.Sprintf("Could not put operation for %s in the ledger: %s", "votecast", compositePutErr.Error()))
+		return shim.Error(fmt.Sprintf("Could not put operation for %s in the ledger: %s", votecastName, compositePutErr.Error()))
 	}
 
 	return shim.Success(nil)
