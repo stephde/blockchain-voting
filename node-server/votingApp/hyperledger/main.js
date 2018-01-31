@@ -6,7 +6,7 @@ let Hyperledger = require("./hyperledger.js");
 let hyperledger = new Hyperledger();
 
 function runElection() {
-    const numOfUsers = 40;
+    const numOfUsers = 50;
 
     let userIds = []
     for (let i=0; i < numOfUsers; i++) {
@@ -17,53 +17,44 @@ function runElection() {
         .then(() => timedCall(hyperledger.initVote, [], 'Init Vote'))
         .then(() => timedCall(hyperledger.setEligible, userIds, 'Set Eligible'))
         .then(() => timedCall(hyperledger.beginSignUp, "Do you like Blockchain?", 'begin sign up'))
-        .then(() => timedCall(() => runFuncParallelForUsers((userId) => hyperledger.registerForVote(userId), userIds), [], 'register for vote'))
-        .then(() => setTimeout(function() {
-          console.log("Waited for 10 seconds");
-          timedCall(hyperledger.finishRegistrationPhase, [], 'finishRegistrationPhase')
-          .then(() => timedCall(() => runFuncParallelForUsers((userId) => hyperledger.vote(userId, '1'), userIds), [], 'voting'))
-          .then(() => setTimeout(function() {
-            console.log("Waited for 10 seconds");
-            timedCall(hyperledger.computeTally, [], "compute tally")
-          }, 10000))
-          // .then(() => timedCall(hyperledger.computeTally, [], "compute tally"))
-          .then(console.log, console.log)
-        }, 10000))
-        // .then(() => timedCall(hyperledger.finishRegistrationPhase, [], 'finishRegistrationPhase'))
-        // .then(() => timedCall(() => runFuncParallelForUsers((userId) => hyperledger.vote(userId, '1'), userIds), [], 'voting'))
-        // .then(() => setTimeout(function() {
-        //   console.log("Waited for 1 seconds");
-        //   timedCall(hyperledger.computeTally, [], "compute tally")
-        // }, 1000))
-        // // .then(() => timedCall(hyperledger.computeTally, [], "compute tally"))
-        // .then(console.log, console.log)
+        .then(() => timedCall(() => runFuncParallelForUsers(
+            (userId) => hyperledger.registerForVote(userId), userIds), [], 'register for vote'))
+        .then(() => promisedTimeout(2000))
+        .then(() => timedCall(hyperledger.finishRegistrationPhase, [], 'finishRegistrationPhase'))
+        .then(() => timedCall(() =>
+            runFuncParallelForUsers(
+                (userId) => hyperledger.vote(userId, '1'), userIds), [], 'voting'))
+        .then(() => promisedTimeout(5000))
+        .then(() => timedCall(hyperledger.computeTally, [], "compute tally"))
+        .then(console.log)
+        .catch(console.log)
 }
 
 function timedCall(func, params, identifier){
-  var start = new Date().getTime();
-  var promise = func(params);
-  var end = new Date().getTime();
-  var totalTime = end-start;
-  console.log("Time spend for "+identifier + ": "+ totalTime+ "ms")
-  return promise;
+    let start = new Date().getTime();
+    let promise = func(params);
+    let end = new Date().getTime();
+
+    console.log("Time spend for " + identifier + ": " + end-start + "ms")
+    return promise;
 }
 
-function runFuncParallelForUsers(func, userIds) {
+async function runFuncParallelForUsers(func, userIds) {
     let promises = [];
 
     let index;
     for (index in userIds) {
+        await promisedTimeout(200)
         promises.push(func(userIds[index]))
     }
 
     return Promise.all(promises);
 }
 
-function runFuncForUsers(func, userIds) {
-    let index;
-    for (index in userIds) {
-        func(userIds[index])
-    }
+// promisified version of setTimeOut
+function promisedTimeout(ms) {
+    console.log("Waiting for " + ms + "ms ...")
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 runElection();
