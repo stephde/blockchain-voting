@@ -21,7 +21,7 @@ func Test_SubmitVote(t *testing.T) {
 	checkInvoke(t, stub, [][]byte{[]byte("submitVote"), []byte(userID), []byte(strconv.Itoa(1))})
 
 	name := "vote"
-	deltaResultsIterator, _ := stub.GetStateByPartialCompositeKey("varName~userID~vote~txID", []string{name, userID})
+	deltaResultsIterator, _ := stub.GetStateByPartialCompositeKey("varName~userID~vote~txID", []string{name})
 	assert.True(t, deltaResultsIterator.HasNext())
 }
 

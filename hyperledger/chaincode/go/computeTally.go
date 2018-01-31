@@ -49,9 +49,7 @@ func (s *SmartContract) computeTally(stub shim.ChaincodeStubInterface) sc.Respon
 		}
 
 		// Retrieve the delta value and operation
-		// userID := keyParts[1]
 		vote, _ := strconv.Atoi(keyParts[2])
-
 		tempResult[vote]++
 	}
 
