@@ -54,12 +54,12 @@ func (s *SmartContract) computeTally(stub shim.ChaincodeStubInterface) sc.Respon
 	}
 
 	if i < totalRegistered {
-		return shim.Error("Someone did not vote")
+		logger.Error("Someone did not vote")
 	} else if i > totalRegistered {
-		return shim.Error("Someone vote multiple times")
+		return shim.Error("Someone voted multiple times")
 	}
 
-	finalTally := Result{totalRegistered, tempResult}
+	finalTally := Result{i, tempResult}
 
 	// All votes have been accounted for...
 	// Get tally and change state to 'Finished'
