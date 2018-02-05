@@ -60,9 +60,10 @@ func (s *SmartContract) reconstructKeys(totalRegistered int, voters []Voter) []V
 	voterZero.reconstructedKey.X = afteri[0]
 	voterZero.reconstructedKey.Y = big.NewInt(0).Sub(pp, afteri[1])
 
+	voters[0] = voterZero
+
 	// Step 2 is to add to beforei, and subtract from afteri.
 	for i := 1; i < totalRegistered; i++ {
-
 		if i == 1 {
 			beforei[0] = voters[0].registeredKey.X
 			beforei[1] = voters[0].registeredKey.Y
@@ -85,7 +86,7 @@ func (s *SmartContract) reconstructKeys(totalRegistered int, voters []Voter) []V
 			// Grab negation of afteri (seems like it did not seem to work with Jacob co-ordinates)
 			afteri[0], afteri[1] = curve.Add(afteri[0], afteri[1], temp[0], temp[1])
 
-			temp[0], temp[1] = afteri[0], big.NewInt(0).Sub(pp, afteri[i])
+			temp[0], temp[1] = afteri[0], big.NewInt(0).Sub(pp, afteri[1])
 
 			// Now we do beforei - afteri...
 			yG[0], yG[1] = curve.Add(beforei[0], beforei[1], temp[0], temp[1])
