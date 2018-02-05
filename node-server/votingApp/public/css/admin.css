@@ -1,3 +1,8 @@
+/*custom font*/
+@import url(http://fonts.googleapis.com/css?family=Montserrat);
+@import url(http://fonts.googleapis.com/css?family=Lalezar);
+@import url(http://fonts.googleapis.com/css?family=Lobster);
+
 body {
 
   font-family: montserrat, arial, verdana;

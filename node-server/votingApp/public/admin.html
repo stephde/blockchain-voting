@@ -1,6 +1,6 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -9,25 +9,31 @@
     <meta name="description" content="Open Vote Network on Ethereum">
     <meta name="author" content="Paddy">
     <title>Admin Page</title>
-
     <!-- Bootstrap core CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
-
     <!-- Custom styles for this template -->
     <link href="css/starter-template.css" rel="stylesheet">
-
     <link href="css/jquery.datetimepicker.css" rel="stylesheet">
-
     <link href="css/admin.css" rel="stylesheet">
-
   </head>
 
   <body>
+      <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <a class="navbar-brand" href="#">Blockchain Voting</a>
+          </div>
+          <ul class="nav navbar-nav">
+            <li><a href="index.html">Voting</a></li>
+            <li class="disabled"><a href="livefeed.html">Monitor</a></li>
+            <li class="active"><a href="admin.html">Admin</a></li>
+          </ul>
+        </div>
+      </nav>
 
     <div class="container">
       <ul id="progressbar" style="margin-left:300px;">
-          <!-- <li id="pb_unlock" class="active">Unlock Address</li> -->
-          <li id="pb_setup">Set up</li>
+          <li id="pb_setup" class="active">Set up</li>
           <li id="pb_register">Register</li>
           <!-- <li id="pb_commit">Commit</li> -->
           <li id="pb_cast">Cast</li>
@@ -40,100 +46,39 @@
         <div hidden id="login">
            <div id='dropdown'></div>
         </div>
-        <div id="eligible">
+
+        <button onclick="initVote()" class="btn btn-success" id="initVoteBtn">Start new vote!</button>
+
+        <div hidden id="eligible">
           <p id="eligible_area">
-             <textarea id="addresses" name="list" cols="40" rows="5"></textarea>
-             <br>
-             <button onclick="setEligible()" class="btn btn-secondary">Update eligibility list</button>
+            <label for="addresses">Eligible userIDs:</label>
+            <textarea id="addresses" name="list" class="form-control" rows="5"></textarea>
+            <br>
+            <button onclick="setEligible()" class="btn btn-primary" id="addressesBtn">Update eligibility list</button>
           </p>
-		      <!-- <p><button onclick="finishEligible()" class="btn btn-primary">Next</button></p> -->
         </div>
 
-        <div id="listoftimers">
-          <!-- <div id="registrationSetTimes">
-
-            <p>A timetable is necessary to ensure the election progresses in a timely manner.</p>
-            <hr>
-
-            <p>What time should the election begin?  </p>
-            <p id="datepairExample">
-                Voters should register by <input id="datetimepickerfinishby" type="text">
-            </p>
-            <hr>
-
-            <p>Set a deadline for each phase in the election:
-            <p id="endSignup">
-                Begin Election: <input id="datetimepickerendsignup" type="text">
-            </p>
-            <p id="endCommitment">
-                Commitment: <input id="datetimepickerendcommitment" type="text">
-            </p>
-            <p id="endVote">
-                Voting: <input id="datetimepickerendvote" type="text">
-            </p>
-            <p id="endRefund">
-                Refund: <input id="datetimepickerendrefund" type="text">
-            </p>
-
-          </div>
-          <p><button onclick="finishSetTimes()" class="btn btn-primary">Next</button></p> -->
-        </div>
-
-        <div id="registrationSetQuestion">
-          <p>Question:  <input type='text' id='questioninput' value='Dummy Question?'/> </p>
-          <!-- <p id="deposit">
-              Deposit required: <input type="number" id='depositinput' value='1'/>
-          </p> -->
-          <!-- <p><input type="checkbox" id="commitmenttick" checked> Enable the 'Commitment' Phase?</p> -->
-          <p id="beginRegistrationbutton"><button onclick="beginRegistration()" class="btn btn-primary">Begin Registration Phase</button></p>
+        <div hidden id="registrationSetQuestion">
+          <p>Question:  <input type='text' id='questioninput' value=''/> </p>
+          <p id="beginRegistrationbutton"><button onclick="beginRegistration()" class="btn btn-primary" id="beginregistrationBtn">Begin Registration Phase</button></p>
         </div>
 
         <div hidden id="finishRegistration">
-              <p id="currentRegistration"></p>
-              <p id="finishby"></p>
-              <p id="totalregistered"></p>
-              <button class="btn btn-primary" onclick="finishRegistration()">Finish Registration Phase</button>
+              <button class="btn btn-primary" onclick="finishRegistration()" id="finishRegistrationBtn">Finish Registration Phase</button>
         </div>
 
-        <div hidden id="commit">
-          <p id="totalcommit"></p>
-          <hr>
-          <p id="committimer"></p>
-        </div>
-        <div hidden id="votephase">
-          <p id="totalvoters"></p>
-          <p id="tallybutton"><button onclick="tally()" class="btn btn-primary">Get Tally</button></p>
-          <hr>
-          <p id="votetimer"></p>
-        </div>
         <div hidden id="tallydiv">
-            <p><span id="depositrefunded"></span>
-            <hr>
-            <p id="newvote"></p>
-            <div hidden id="refund-valid">
-              <p>Claim your deposit of <span id="refund"></span> ether before <span id="refundclock"></span></p>
-              <p id="claimrefundbutton"><button onclick="claimrefund()" class="btn btn-success">Claim Refund</button></p>
-              <p hidden id="waitingforrefund">Waiting for Ethereum to confirm your refund</p>
-            </div>
+
+            <p>Waiting for votes ...</p>
+            <br />
+
+            <button onclick="tally()" class="btn btn-primary">Tally election</button>
+            <br />
 
             <button onclick="resetElection()" class="btn btn-success">Start a new vote</button>
         </div>
       </div>
     </div>
-
-    <!-- <hr> -->
-    <div>
-      <br>
-      <div hidden id="cancelelec"><button id="cancelelectionbutton" onclick="cancelElection()" class="btn btn-danger">Cancel Election</button></div>
-      <!-- <div hidden id="unspentdeposits"><button onclick="claimUnspentDeposits()" class="btn btn-danger">Send deposits to Charity</button></div> -->
-    </div>
-      <div hidden id="txlist">
-        <p>Transaction List:</p>
-      </div>
-      <div hidden id="infodiv">
-        <p>Events from Ethereum:</p>
-      </div>
-    </div><!-- /.container -->
 
     <!-- Bootstrap core JavaScript
     ================================================== -->
@@ -146,52 +91,17 @@
 
 <script>
 
-setInitialTimes();
+function initVote() {
+  $.ajax({
+          type: "POST",
+          url: '/voting/initVote',
+          data: {}
+  });
 
-// Controls which times and dates are displayed by default
-// We need to ensure there is a 'minimum' gap between default times too.
-// TODO: When the 'gap' drop down box is used... update all times accordingly.
-function setInitialTimes() {
-
-   var endreg = new Date();
-   var endsignuptime = new Date();
-   //var gap = anonymousvotingAddr.gap();
-
-   endreg.setTime(endreg.getTime() + (1000));
-   // Initial time is set here.
-   jQuery('#datetimepickerfinishby').datetimepicker(
-     {minDate:'0', // Sets minimum date as today
-      value:endreg});
-
-   endsignuptime.setTime(endreg.getTime() + (1000));
-   jQuery('#datetimepickerendsignup').datetimepicker(
-     {minDate:'0', // Sets minimum date as today
-      value:endsignuptime});
-
-   var endcommittime = new Date();
-   endcommittime.setTime(endsignuptime.getTime() + (1000));
-   jQuery('#datetimepickerendcommitment').datetimepicker(
-     {minDate:'0', // Sets minimum date as today
-     value:endcommittime});
-
-   var endvotetime = new Date();
-   endvotetime.setTime(endcommittime.getTime() + (1000));
-   jQuery('#datetimepickerendvote').datetimepicker(
-     {minDate:'0', // Sets minimum date as today
-     value:endvotetime});
-
-   var endrefund = new Date();
-   endrefund.setTime(endvotetime.getTime() + (1000));
-   jQuery('#datetimepickerendrefund').datetimepicker(
-     {minDate:'0', // Sets minimum date as today
-     value:endrefund});
-
-
-   $.datetimepicker.setLocale('en');
-
+  document.getElementById('initVoteBtn').disabled = true;
+  document.getElementById('eligible').removeAttribute('hidden');
 }
 
-// Check that the user is eligible to vote
 function setEligible() {
   var eligibleUsers = document.getElementById('addresses').value.split(',')
 
@@ -202,9 +112,10 @@ function setEligible() {
             'eligibleUsers': eligibleUsers
           }
   });
+
+  document.getElementById('registrationSetQuestion').removeAttribute('hidden');
 }
 
-// Allow people to start submiting their voting key.
 function beginRegistration() {
   var votingQuestion = document.getElementById('questioninput').value;
 
@@ -215,465 +126,24 @@ function beginRegistration() {
             votingQuestion: votingQuestion
           }
   });
+
+  document.getElementById('addresses').disabled = true;
+  document.getElementById('addressesBtn').disabled = true;
+  document.getElementById('questioninput').disabled = true;
+  document.getElementById('beginregistrationBtn').disabled = true;
+  document.getElementById('finishRegistration').removeAttribute('hidden');
+
 }
 
-function destorypickers() {
-    $('#datetimepickerfinishby').datetimepicker('destroy');
-    $('#datetimepickerendsignup').datetimepicker('destroy');
-    $('#datetimepickerendcommitment').datetimepicker('destroy');
-    $('#datetimepickerendvote').datetimepicker('destroy');
-}
-// Allow the Election Authority to finish the registration phase...
-// function finishRegistration() {
-//   if(!addressChosen) {
-//     alert("Please unlock your Ethereum address");
-//     return;
-//   }
+function finishRegistration() {
+  $.ajax({
+          type: "POST",
+          url: '/voting/finishRegistrationPhase',
+          data: {}
+  });
+
+  document.getElementById('finishRegistrationBtn').disabled = true;
+  document.getElementById('tallydiv').removeAttribute('hidden');
 
-//   if(state != 1) {
-//     alert("Please wait until Registration Phase");
-//     return;
-//   }
-
-//   if(anonymousvotingAddr.totalregistered() < 3) {
-//     alert("Election cannot begin until there is 3 or more registered voters");
-//     return;
-//   }
-
-//   var time = new Date();
-//   var finishReg = anonymousvotingAddr.finishSignupPhase() * 1000;
-
-//   if(time.getTime() < finishReg) {
-//     alert("Please wait until " + clockformat(new Date(finishReg)) + " before finishing registration");
-//     return;
-//   }
-
-//   web3.personal.unlockAccount(addr,password);
-
-//   res = anonymousvotingAddr.finishRegistrationPhase.sendTransaction({from:web3.eth.accounts[accountindex], gas: 4200000});
-//   document.getElementById("finishRegistration").innerHTML  = "Waiting for Ethereum to confirm that Registration has finished";
-
-//   txlist("Finish Registration Phase: " + res);
-// }
-
-// // Tell Ethereum to compute Tally
-// function tally() {
-
-//   // Ethereum Account needs to be unlocked.
-//   if(!addressChosen) {
-//     alert("Please unlock your Ethereum address");
-//     return;
-//   }
-
-//   // Make sure we are in the correct phase.
-//   if(state != 3) {
-//     alert("Please wait until VOTE Phase");
-//     return;
-//   }
-//   var reg = anonymousvotingAddr.totalregistered();
-//   var voted = anonymousvotingAddr.totalvoted();
-
-//   // Make sure everyone has voted!
-//   if(!reg.equals(voted)) {
-//      alert("Please wait for everyone to vote");
-//      return;
-//   }
-
-//   //TODO: Check that all votes have been cast..
-//   // Can do this by checking the public 'votecast' mapping...
-//   web3.personal.unlockAccount(web3.eth.accounts[accountindex],password);
-//   var res = anonymousvotingAddr.computeTally.sendTransaction({from:web3.eth.accounts[accountindex], gas: 4200000});
-//   document.getElementById("tallybutton").innerHTML  = "Waiting for Ethereum to confirm tally";
-//   txlist("Compute Tally: " + res);
-// }
-
-// function reset() {
-//   web3.personal.unlockAccount(web3.eth.accounts[accountindex],password);
-//   var res = anonymousvotingAddr.reset.sendTransaction({from:web3.eth.accounts[accountindex], gas: 4200000});
-//     txlist("Reset: " + res);
-// }
-
-// // Update question set for vote.
-// function whatIsQuestion() {
-
-//   if(anonymousvotingAddr.state() > 0) {
-//     var q = anonymousvotingAddr.question();
-//     document.getElementById('title').innerHTML = q;
-//   }
-// }
-
-// // Keep a list of transaction hashes on the website. Might be useful...
-// function txlist(extra) {
-//     document.getElementById('txlist').innerHTML = document.getElementById('txlist').innerHTML + "<br>" + extra;
-// }
-
-// // STEP 1: User must find an Ethereum account that is recognised as the owner of the contract
-// // and then the user MUST log in with that account!!
-// var openedLogIn = false;
-// var signedIn = false;
-
-// function openLogin() {
-
-//   if(!openedLogIn) {
-//     openedLogIn = true;
-//     document.getElementById('login').removeAttribute("hidden");
-//     var selectbox = "<p>Address: <select id='addrs'>";
-
-//     var foundOwner = false;
-
-//     // Let user select one of their Ethereum addresses
-//     for(var i=0; i<web3.eth.accounts.length; i++) {
-
-//       if(anonymousvotingAddr.owner() == web3.eth.accounts[i]) {
-//         foundOwner = true;
-//         selectbox = selectbox + '<option value="' + i + '">' + web3.eth.accounts[i] + '</option>';
-//       }
-//     }
-
-//     selectbox = selectbox + "</select></p>";
-//     selectbox = selectbox + "<p>Password: <input type='password' id='passwordf' value='' name='fname'> <button onclick='unlock()' class='btn btn-primary'>Unlock</button> </p>";
-
-//     if(foundOwner) {
-//       document.getElementById('dropdown').innerHTML = selectbox;
-//     } else {
-//       document.getElementById('dropdown').innerHTML = "You do not have an Ethereum account that is the Election Authority for this vote";
-//     }
-//   }
-// }
-
-// function unlock(callback) {
-//   var _addr = $('#addrs').find(":selected").text();
-//   var _password = document.getElementById('passwordf').value;
-
-//   if(web3.personal.unlockAccount(_addr,_password)) {
-//     addressChosen = true;
-//     addr = _addr;
-//     password = _password;
-//     accountindex = $( "#addrs" ).val();
-//     signedIn = true;
-//     document.getElementById('login').setAttribute("hidden", true);
-//     currentState();
-//   }
-// }
-
-// // STEP 2: Admin must be able to set a list of eligible voters
-// var eligibletextboxCreated = false;
-// function createEligibleTextBox() {
-
-//   if(!eligibletextboxCreated) {
-//     eligibletextboxCreated = true;
-//     document.getElementById('title').innerHTML = "List of Eligible Voters";
-//     document.getElementById('question').setAttribute("hidden", true);
-//     document.getElementById('eligible').removeAttribute("hidden");
-
-//     // LAZY: Pre-fill the text box with my own addresses.
-//     for(var i=1; i<41; i++) {
-//        document.getElementById('addresses').value = document.getElementById('addresses').value + web3.eth.accounts[i] + ",";
-//     }
-//   }
-
-//   var res = anonymousvotingAddr.totaleligible().equals(new BigNumber("40"));
-//   var isHidden = document.getElementById('eligible').hasAttribute('hidden');
-
-//   if(!res && !isHidden) {
-//     document.getElementById('section_desc').innerHTML = "There is currently <span id='totaleligible'>0</span> eligible voters. <br> Would you like to add more?";
-//     document.getElementById('totaleligible').innerHTML = anonymousvotingAddr.totaleligible() + "/40";
-//   } else if(!isHidden) {
-//     document.getElementById('section_desc').innerHTML = "There is currently <span id='totaleligible'>0</span> eligible voters. <br> You cannot add any more voters.";
-//     document.getElementById('totaleligible').innerHTML = anonymousvotingAddr.totaleligible() + "/40";
-//     document.getElementById('eligible_area').setAttribute("hidden",true);
-//   }
-
-// }
-
-// function finishEligible() {
-//   if(anonymousvotingAddr.totaleligible() >= 3) {
-//     setInitialTimes();
-//     document.getElementById('title').innerHTML = "The Election Time Table";
-//     document.getElementById('section_desc').innerHTML = "";
-//     document.getElementById('eligible').setAttribute("hidden", true);
-//     document.getElementById('listoftimers').removeAttribute("hidden");
-//   } else {
-//     alert("A minimum number of 3 eligible voters is required before continuing.");
-//   }
-// }
-
-// var finishSettingTimes = false;
-
-// function finishSetTimes() {
-//   document.getElementById('title').innerHTML = "Election Configuration";
-//   document.getElementById('section_desc').innerHTML = "";
-//   document.getElementById('listoftimers').setAttribute("hidden", true);
-//   document.getElementById('registrationSetQuestion').removeAttribute("hidden");
-// }
-
-// // STEP 3: Admin must finish the registration phase
-// var finishRegistrationCreated = false;
-// function createFinishRegistration() {
-
-//   if(!finishRegistrationCreated) {
-//      finishRegistrationCreated = true;
-//     //  document.getElementById('title').innerHTML = "Voter Registration";
-//      document.getElementById('eligible').setAttribute("hidden", true);
-//      document.getElementById('registrationSetQuestion').setAttribute("hidden", true);
-//      document.getElementById('finishRegistration').removeAttribute("hidden");
-//      document.getElementById('question').removeAttribute("hidden");
-
-//      // Update the state, and finish time.
-//      var date = new Date();
-//      date.setTime(anonymousvotingAddr.endSignupPhase() * 1000);
-//   }
-
-//   // Make sure it exists... We might be in the 'Please wait on Ethereum' part.
-//   if(document.getElementById('totalregistered') != null) {
-//     document.getElementById('totalregistered').innerHTML = "" + anonymousvotingAddr.totalregistered() + "/" + anonymousvotingAddr.totaleligible() + " voters have registered their ballot.";
-
-//     // Statistics on number of registered voters, and when authority can transition to the next phase
-//     var finishby = document.getElementById('finishby');
-//     if(finishby != null) {
-//       var date = new Date();
-//       date.setTime(anonymousvotingAddr.finishSignupPhase() * 1000);
-//       document.getElementById('finishby').innerHTML = "You can finish registration after " + clockformat(date);
-//     }
-//   }
-
-// }
-
-// var commitCreate = false;
-// function createCommit() {
-
-//   if(!commitCreate) {
-//     commitCreate = true;
-//     document.getElementById('commit').removeAttribute("hidden");
-//     document.getElementById('finishRegistration').setAttribute("hidden",true);
-//     document.getElementById('section_desc').innerHTML = "Waiting for voters to submit a commitment, but not reveal their encrypted vote to Etheruem. ";
-//   }
-
-//   document.getElementById('committimer').innerHTML = "Refunds are issued after " + clockformat(new Date(anonymousvotingAddr.endCommitmentPhase() * 1000)) + " if all voters do not commit to their vote.";
-//   // Keep track of how many voters have been set as eligible.
-//   document.getElementById('totalcommit').innerHTML = anonymousvotingAddr.totalcommitted() + "/" + anonymousvotingAddr.totalregistered() + " voters have sealed their vote.";
-
-// }
-
-// var voteCreate = false;
-// function createVote() {
-
-//   if(!voteCreate) {
-//     voteCreate = true;
-//     document.getElementById('commit').setAttribute("hidden", true);
-//     document.getElementById('finishRegistration').setAttribute("hidden",true);
-//     document.getElementById('votephase').removeAttribute("hidden");
-//     document.getElementById('section_desc').innerHTML = "";
-//     controlTransition("#pb_cast");
-//   }
-
-//   document.getElementById('votetimer').innerHTML = "Refunds are issued after " + clockformat(new Date(anonymousvotingAddr.endVotingPhase() * 1000)) + " if all voters do not cast their vote.";
-//   document.getElementById('totalvoters').innerHTML = anonymousvotingAddr.totalvoted() + "/" + anonymousvotingAddr.totalregistered() + " voters have cast their vote.";
-// }
-
-// var tallyCreate = false;
-// function createTally() {
-
-//   if(!tallyCreate) {
-//     tallyCreate = true;
-
-//     document.getElementById('tallydiv').removeAttribute("hidden");
-
-//     // var res1 = anonymousvotingAddr.totalregistered().eq(anonymousvotingAddr.totalvoted());
-//     // var res2 = !anonymousvotingAddr.totalregistered().eq(new BigNumber("0"));
-//     // alert(res1 + " " + res2);
-
-//     if((anonymousvotingAddr.totalregistered().eq(anonymousvotingAddr.totalvoted())) && !anonymousvotingAddr.totalregistered().eq(new BigNumber("0"))) {
-//       var yes = anonymousvotingAddr.finaltally(0);
-//       var total = anonymousvotingAddr.finaltally(1);
-//       var no = total - yes;
-//       document.getElementById("section_desc").innerHTML = "Yes = " + yes + " and No = " + no + "<hr>";
-//     } else {
-//       document.getElementById("section_desc").innerHTML = "Voting has been cancelled.";
-//     }
-
-//     document.getElementById("depositrefunded").innerHTML = anonymousvotingAddr.totalrefunded() + "/" + anonymousvotingAddr.totaltorefund() + " voters have received their refund.";
-//     document.getElementById("newvote").innerHTML = "A new vote can begin after " + clockformat(new Date(anonymousvotingAddr.endRefundPhase()*1000));
-//     document.getElementById('votephase').setAttribute("hidden",true);
-//     document.getElementById('finishRegistration').setAttribute("hidden", true);
-//     document.getElementById('commit').setAttribute("hidden", true);
-
-//     controlTransition("#pb_tally");
-//   }
-// }
-
-function clockformat(date) {
-
-   if(date.getMinutes() < 10) {
-     mins = "0" + date.getMinutes();
-   } else {
-     mins = date.getMinutes();
-   }
-
-   var toString = date.getHours() + ":" + mins + ", "
-
-   toString = toString + (date.getMonth() + 1) + "/" + date.getDate() + "/" + date.getFullYear();
-
-   return toString;
-}
-
-var alldone = false;
-
-// Responsible for updating the website's text depending on the election's current phase. (i.e. if we are in VOTE, no point enabling compute button).
-// function currentState() {
-
-//   openLogin();
-
-//   // Make sure user has unlocked an Ethereum account...
-//   if(!signedIn) {
-//     return;
-//   }
-
-//   checkDeadlines();
-
-//   if(alldone) {
-
-//     // Check if he has been refunded
-//     if(anonymousvotingAddr.refunds(web3.eth.accounts[accountindex]) > 0) {
-//       document.getElementById("refund-valid").removeAttribute("hidden");
-//     } else {
-//       document.getElementById("refund-valid").setAttribute("hidden",true);
-//     }
-
-//     // Just inform election authority that people are still being refunded.
-//     document.getElementById("depositrefunded").innerHTML = anonymousvotingAddr.totalrefunded() + "/" + anonymousvotingAddr.totaltorefund() + " voters have received their refund."
-//     return;
-//   }
-
-//   state = anonymousvotingAddr.state();
-//   whatIsQuestion();
-
-//   if(state == 0) { // SETUP
-
-//     createEligibleTextBox();
-//     controlTransition("#pb_setup")
-//   } else if(state == 1) { // SIGNUP
-//     createFinishRegistration();
-//     controlTransition("#pb_register")
-//     // Ensure pickers are destroyed
-//     destorypickers();
-
-//   } else if(state == 2) { // COMMITMENT
-//     createCommit();
-//     controlTransition("#pb_commit")
-//     // Ensure pickers are destroyed
-//     destorypickers();
-
-//   } else if(state == 3) { // VOTE
-//     createVote();
-//     controlTransition("#pb_cast")
-//     // Ensure pickers are destroyed
-//     destorypickers();
-
-//   } else if(state == 4) { // TALLY
-//     createTally();
-//     controlTransition("#pb_tally")
-
-//     //Keep track of the number of voters who have received their refund.
-//     alldone = true;
-//     // Ensure pickers are destroyed
-//     destorypickers();
-//   } else {
-//     document.getElementById('state').innerHTML = "Undocumented Phase...";
-//   }
-// }
-// setInterval("currentState()", 10000);
-// currentState();
-
-// var current_fs = "";
-
-// function claimrefund() {
-
-//   web3.personal.unlockAccount(addr, password);
-//   var res = anonymousvotingAddr.withdrawRefund.call({ from: web3.eth.accounts[accountindex], gas: 4200000});
-
-//   if(res) {
-//     anonymousvotingAddr.withdrawRefund.sendTransaction({from: web3.eth.accounts[accountindex],gas: 4200000});
-//     document.getElementById('claimrefundbutton').setAttribute("hidden", true);
-//     document.getElementById("waitingforrefund").removeAttribute("hidden");
-//   }
-//   // alert("test");
-//   return false;
-// }
-
-
-// function checkDeadlines() {
-
-//   var state = anonymousvotingAddr.state();
-//   var currentTime = new Date().getTime();
-//   var time = 9999999999999; // High value to always be greater than a unix timestamp
-
-//   // Find the relevant time...
-//   switch(state.toString("10")) {
-//     case "1":
-//       time = anonymousvotingAddr.endSignupPhase() * 1000;
-//       break;
-//     case "2":
-//       time = anonymousvotingAddr.endCommitmentPhase() * 1000;
-//       break;
-//     case "3":
-//       time = anonymousvotingAddr.endVotingPhase() * 1000;
-//       break;
-//     default:
-//       break;
-//   }
-
-//   if(currentTime > time) {
-//       document.getElementById("cancelelec").removeAttribute("hidden");
-//   } else {
-//       document.getElementById("cancelelec").setAttribute("hidden", true);
-//   }
-
-//   // Can the election authority claim any deposits?
-//   if(anonymousvotingAddr.lostdeposit() > 0) {
-//     document.getElementById("unspentdeposits").removeAttribute("hidden");
-//   } else {
-//     document.getElementById("unspentdeposits").setAttribute("hidden",true);
-//   }
-// }
-
-function controlTransition(nextfs) {
-
-  // Prevent weird loop
-  if(current_fs == nextfs) {
-    return;
-  }
-
-  // Nope.. jump to latest state.
-  var state = anonymousvotingAddr.state();
-  switch(state.toString("10")) {
-    case "0":
-       $("#pb_setup").addClass("active");
-       break;
-    case "1":
-       $("#pb_setup").addClass("active");
-       $("#pb_register").addClass("active");
-       break;
-    case "2":
-       $("#pb_setup").addClass("active");
-       $("#pb_register").addClass("active");
-       $("#pb_commit").addClass("active");
-       break;
-    case "3":
-       $("#pb_setup").addClass("active");
-       $("#pb_register").addClass("active");
-       $("#pb_commit").addClass("active");
-       $("#pb_cast").addClass("active");
-       break;
-    case "4":
-       $("#pb_setup").addClass("active");
-       $("#pb_register").addClass("active");
-       $("#pb_commit").addClass("active");
-       $("#pb_cast").addClass("active");
-       $("#pb_tally").addClass("active");
-       break;
-    default:
-      break;
-  }
 }
 </script>

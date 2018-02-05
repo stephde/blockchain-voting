@@ -4,7 +4,7 @@ let favicon = require('serve-favicon');
 let logger = require('morgan');
 let bodyParser = require('body-parser');
 
-let Hyperledger = require('./hyperledger/hyperledger.js')
+let Hyperledger = require('./hyperledger/hyperledger.js');
 let hyperledger = new Hyperledger();
 
 let app = express();
@@ -48,11 +48,23 @@ app.post('/voting/setEligible', function(req, res, next) {
 });
 
 app.post('/voting/beginSignUp', function(req, res, next) {
-  // for simplicity: do initVote and beginSignUp in one ajax call
-  hyperledger.initVote();
-
   hyperledger.beginSignUp(req.body.votingQuestion);
 });
+
+app.post('/voting/registerUser', function(req, res, next) {
+  // todo: check if eligible
+  hyperledger.register(req.body.userID);
+});
+
+app.get('/voting/question', function(req, res, next) {
+  hyperledger.question().then(function (results) {
+    res.json({  question: results.toString('utf8') });
+  });
+});
+
+app.post('/voting/finishRegistrationPhase', function(req, res, next) {
+  hyperledger.finishRegistrationPhase();
+})
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

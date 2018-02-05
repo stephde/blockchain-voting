@@ -28,6 +28,11 @@ Hyperledger = function(){
     return registration.registerUser(_this.client, user.id);
   }
 
+  _this.register = function (userID) {
+      console.log("Registering " + userID + " for the vote")
+      return invoke.invokeTransaction(_this.client, _this.channel, 'register', [userID], defaultUserId)
+  }
+
   _this.getUser = function (userId) {
     //ToDo: actually get user
     return new Promise((resolve, reject) => resolve({id: userId}));
@@ -61,6 +66,16 @@ Hyperledger = function(){
       // generate ZKP
       let vG = 0;
       return invoke.invokeTransaction(_this.client, _this.channel, 'registerForVote', ['xG', vG, 'r'], defaultUserId)
+  }
+
+  _this.finishRegistrationPhase = function () {
+      console.log("Finishing registration phase...")
+      return invoke.invokeTransaction(_this.client, _this.channel, 'finishRegistrationPhase', [], defaultUserId)
+  }
+
+  _this.question = function(){
+      console.log("Getting the question ...")
+      return query.executeQuery(_this.hlAdapter.client, _this.hlAdapter.channel, 'question', [''], defaultUserId);
   }
 
   _this.computeTally = function () {
