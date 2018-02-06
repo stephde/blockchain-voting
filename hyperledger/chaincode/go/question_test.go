@@ -1,11 +1,6 @@
 package main
 
-import (
-	"testing"
-
-	"github.com/hyperledger/fabric/core/chaincode/shim"
-)
-
+/*
 func Test_Question(t *testing.T) {
 	stub := shim.NewMockStub("test_question", new(SmartContract))
 
@@ -16,3 +11,4 @@ func Test_Question(t *testing.T) {
 
 	checkQuery(t, stub, "question", question)
 }
+*/

@@ -1,12 +1,6 @@
 package main
 
-import (
-	"testing"
-
-	"github.com/hyperledger/fabric/core/chaincode/shim"
-	"github.com/stretchr/testify/assert"
-)
-
+/*
 func Test_Register(t *testing.T) {
 	stub := shim.NewMockStub("test_register", new(SmartContract))
 
@@ -39,3 +33,4 @@ func Test_Register(t *testing.T) {
 	_, found := voters[userID]
 	assert.True(t, found)
 }
+*/

@@ -1,11 +1,6 @@
 package main
 
-import (
-	"encoding/json"
-	"testing"
-
-	"github.com/hyperledger/fabric/core/chaincode/shim"
-)
+/*
 
 func Test_ComputeTally(t *testing.T) {
 	stub := shim.NewMockStub("test_computeTally", new(SmartContract))
@@ -24,3 +19,5 @@ func Test_ComputeTally(t *testing.T) {
 
 	checkQuery(t, stub, "computeTally", string(bytes))
 }
+
+*/
