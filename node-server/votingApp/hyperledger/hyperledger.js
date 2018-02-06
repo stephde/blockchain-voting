@@ -78,6 +78,11 @@ Hyperledger = function(){
       return query.executeQuery(_this.hlAdapter.client, _this.hlAdapter.channel, 'question', [''], defaultUserId);
   }
 
+  _this.submitVote = function (userID, vote) {
+      console.log("Submitting a vote for " + userID)
+      return invoke.invokeTransaction(_this.client, _this.channel, 'submitVote', [userID, vote], defaultUserId)
+  }
+
   _this.computeTally = function () {
       console.log("Computing the tally...")
       //ToDo: is this a query or an invocation?

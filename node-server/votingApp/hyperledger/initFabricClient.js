@@ -21,7 +21,8 @@ exports.initFabricClient = function (host, channelId) {
         peer: peer
     };
 
-    console.log("Fabric client has been initialized with : ", clientWrapper);
+    //console.log("Fabric client has been initialized with : ", clientWrapper);
+    console.log("Fabric client has been initialized.");
 
     return clientWrapper;
 }

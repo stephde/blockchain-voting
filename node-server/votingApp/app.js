@@ -64,6 +64,10 @@ app.get('/voting/question', function(req, res, next) {
 
 app.post('/voting/finishRegistrationPhase', function(req, res, next) {
   hyperledger.finishRegistrationPhase();
+});
+
+app.post('/voting/submitVote', function(req, res, next) {
+  hyperledger.submitVote(req.body.userID, req.body.vote);
 })
 
 // catch 404 and forward to error handler

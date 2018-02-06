@@ -53,11 +53,15 @@
               <h2 id="question"></h2>
               <br>
               <div id="do_vote">
-                  <button onclick="vote(1)" class="action-button">Yes</button>
-                  <button onclick="vote(0)" class="action-button">No</button>
+                  <input type="button" onclick="vote('1')" class="action-button" value="Yes" />
+                  <input type="button" onclick="vote('0')" class="action-button" value="No" />
               </div>
               <br>
               <p id="vote_waiting"></p>
+          </fieldset>
+
+          <fieldset id="tallyfs">
+              <h2>Waiting for other votes ...</h2>
           </fieldset>
 
       </form>
@@ -85,11 +89,25 @@
 
         document.getElementById('registerfs').style.display = 'none';
         document.getElementById('votefs').style.display = 'block';
+        $('#progressbar li').removeClass('active');
+        $('#progressbar li:eq(1)').addClass('active');
       }
 
       // User votes yes or no!
       function vote(choice) {
+        $.ajax({
+                type: "POST",
+                url: '/voting/submitVote',
+                data: {
+                  'userID': document.getElementById('userID').value,
+                  'vote': choice
+                }
+        });
 
+        document.getElementById('votefs').style.display = 'none';
+        document.getElementById('tallyfs').style.display = 'block';
+        $('#progressbar li').removeClass('active');
+        $('#progressbar li:eq(2)').addClass('active');
       }
 
       function whatIsQuestion() {

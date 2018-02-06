@@ -37,7 +37,7 @@ exports.invokeTransaction = function (fabricClient, channel, transactionFunc, ar
         return fabricClient.getUserContext(userId, true);
     }).then((userFromStore) => {
         if (userFromStore && userFromStore.isEnrolled()) {
-      		console.log('Successfully loaded user1 from persistence');
+      		//console.log('Successfully loaded user1 from persistence');
       		let member_user = userFromStore;
       	} else {
       		throw new Error('Failed to get user1.... run registerUser.js');
