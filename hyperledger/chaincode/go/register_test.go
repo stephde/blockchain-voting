@@ -20,7 +20,7 @@ func Test_Register(t *testing.T) {
 	PutState(stub, "registered", registered)
 	voters := map[string]Voter{}
 	PutState(stub, "voters", voters)
-	stub.MockTransactionEnd("t124")
+	stub.MockTransactionEnd("t123")
 
 	checkInvoke(t, stub, [][]byte{
 		[]byte("register"),

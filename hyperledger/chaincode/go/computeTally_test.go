@@ -12,7 +12,7 @@ func Test_ComputeTally(t *testing.T) {
 
 	stub.MockTransactionStart("t123")
 	PutState(stub, "state", VOTE)
-	PutState(stub, "totalregistered", 2)
+	PutState(stub, "totalRegistered", 2)
 	voters := map[string]Voter{"1": Voter{"1", 0}, "2": Voter{"2", 1}}
 	PutState(stub, "voters", voters)
 	votecast := map[string]bool{"1": true, "2": true}
