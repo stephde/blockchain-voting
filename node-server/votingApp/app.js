@@ -42,6 +42,9 @@ app.get('/:name', function (req, res, next) {
 app.post('/voting/initVote', function(req, res, next) {
   hyperledger.initVote();
 });
+app.post('/voting/getTally', function(req, res, next){
+  hyperledger.queryAll();
+});
 
 app.post('/voting/setEligible', function(req, res, next) {
   hyperledger.setEligible(req.body.eligibleUsers);
