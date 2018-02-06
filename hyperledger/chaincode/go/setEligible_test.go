@@ -1,12 +1,6 @@
 package main
 
-import (
-	"testing"
-
-	"github.com/hyperledger/fabric/core/chaincode/shim"
-	"github.com/stretchr/testify/assert"
-)
-
+/*
 func Test_SetEligible(t *testing.T) {
 	stub := shim.NewMockStub("test_setEligible", new(SmartContract))
 
@@ -32,3 +26,4 @@ func Test_SetEligible(t *testing.T) {
 	assert.True(t, eligible["b"])
 	assert.True(t, eligible["c"])
 }
+*/

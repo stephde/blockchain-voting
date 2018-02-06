@@ -1,13 +1,6 @@
 package main
 
-import (
-	"strconv"
-	"testing"
-
-	"github.com/hyperledger/fabric/core/chaincode/shim"
-	"github.com/stretchr/testify/assert"
-)
-
+/*
 func Test_WrongStateFinishRegistrationPhase(t *testing.T) {
 	stub := shim.NewMockStub("Test_WrongState", new(SmartContract))
 
@@ -34,3 +27,4 @@ func Test_FinishRegistrationPhase(t *testing.T) {
 	GetState(stub, "state", &state)
 	assert.Equal(t, VOTE, state)
 }
+*/

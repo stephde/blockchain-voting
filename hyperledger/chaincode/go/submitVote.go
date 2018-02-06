@@ -20,9 +20,14 @@ func (s *SmartContract) submitVote(stub shim.ChaincodeStubInterface, args []stri
 	userID := args[0]
 	vote := args[1]
 
+	registerName := "register"
+
 	// Make sure the sender can vote and hasn't already voted
-	var registered map[string]struct{}
-	GetState(stub, "registered", &registered)
+	registerResultsIterator, registerErr := stub.GetStateByPartialCompositeKey("varName~userID~txID", []string{registerName, userID})
+	if registerErr != nil {
+		return shim.Error(fmt.Sprintf("Could not retrieve value for %s: %s", registerName, registerErr.Error()))
+	}
+	defer registerResultsIterator.Close()
 
 	votecastCompositeIndex := "varName~userID~txID"
 	votecastName := "votecast"
@@ -33,11 +38,11 @@ func (s *SmartContract) submitVote(stub shim.ChaincodeStubInterface, args []stri
 	}
 	defer deltaResultsIterator.Close()
 
-	_, found1 := registered[userID]
+	isRegisterd := registerResultsIterator.HasNext()
 	hasVoted := deltaResultsIterator.HasNext()
 
-	if !found1 || hasVoted {
-		if !found1 {
+	if !isRegisterd || hasVoted {
+		if !isRegisterd {
 			return shim.Error(userID + " is not allowed to vote - not registered")
 		}
 		return shim.Error(userID + " is not allowed to vote - already voted")

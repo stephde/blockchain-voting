@@ -1,12 +1,6 @@
 package main
 
-import (
-	"testing"
-
-	"github.com/hyperledger/fabric/core/chaincode/shim"
-	"github.com/stretchr/testify/assert"
-)
-
+/*
 func Test_Register(t *testing.T) {
 	stub := shim.NewMockStub("test_register", new(SmartContract))
 
@@ -27,3 +21,4 @@ func Test_Register(t *testing.T) {
 	deltaResultsIterator, _ := stub.GetStateByPartialCompositeKey("varName~userID~txID", []string{name})
 	assert.True(t, deltaResultsIterator.HasNext())
 }
+*/
