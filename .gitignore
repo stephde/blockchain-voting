@@ -1,3 +1,4 @@
+.DS_Store
 .idea
 node-server/node_modules
 node-server/package-lock.json
