@@ -4,10 +4,8 @@ import (
 	"crypto/ecdsa"
 	"crypto/sha256"
 	"math/big"
-	"testing"
 
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/stretchr/testify/assert"
 )
 
 func createZKP(userId string, x *big.Int, v *big.Int, publicKey *ecdsa.PublicKey) []*big.Int {
@@ -134,6 +132,7 @@ func create1outof2ZKPYesVote(
 	return res, res2
 }
 
+/*
 func Test_VerifyYesVote(t *testing.T) {
 	// Registered Key (public keys)
 	// var xG = [voter[0][0], voter[0][1]];
@@ -210,3 +209,4 @@ func Test_verifyZKP(t *testing.T) {
 	scc := new(SmartContract)
 	assert.True(t, scc.verifyZKP(voter, r, vG))
 }
+*/

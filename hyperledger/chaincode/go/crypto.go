@@ -126,8 +126,6 @@ func (s *SmartContract) verify1outOf2ZKP(
 	c.SetBytes(hashBytes[:])
 
 	// Does c =? d1 + d2 (mod n)
-	logger.Info(params[0])
-	logger.Info(params[1])
 	if c != addMod(params[0], params[1], curve.Params().N) {
 		logger.Error("c != addMod(params[0], params[1], curve.Params().N)")
 		return false
