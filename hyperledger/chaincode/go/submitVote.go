@@ -17,7 +17,7 @@ func (s *SmartContract) submitVote(stub shim.ChaincodeStubInterface, args []stri
 	}
 
 	userID := args[0]
-	vote, err := strconv.Atoi(args[1])
+	_, err := strconv.Atoi(args[1])
 	if err != nil {
 		return shim.Error("Vote was non-readable int")
 	}
@@ -36,12 +36,12 @@ func (s *SmartContract) submitVote(stub shim.ChaincodeStubInterface, args []stri
 	}
 
 	// User is registered and did not cast vote yet
-	var voters map[string]Voter
-	GetState(stub, "voters", &voters)
-	voter := voters[userID]
-	voter.Vote = vote
-	voters[userID] = voter
-	PutState(stub, "voters", voters)
+	// var voters map[string]Voter
+	// GetState(stub, "voters", &voters)
+	// voter := voters[userID]
+	// voter.Vote = vote
+	// voters[userID] = voter
+	// PutState(stub, "voters", voters)
 
 	votecast[userID] = true
 	PutState(stub, "votecast", votecast)
