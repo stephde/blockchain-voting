@@ -16,10 +16,6 @@ func Test_Register(t *testing.T) {
 	PutState(stub, "state", SIGNUP)
 	eligible := map[string]bool{userID: true}
 	PutState(stub, "eligible", eligible)
-	registered := map[string]bool{userID: false}
-	PutState(stub, "registered", registered)
-	voters := map[string]Voter{}
-	PutState(stub, "voters", voters)
 	stub.MockTransactionEnd("t123")
 
 	checkInvoke(t, stub, [][]byte{
@@ -27,15 +23,7 @@ func Test_Register(t *testing.T) {
 		[]byte(userID),
 	})
 
-	var totalRegistered int
-	GetState(stub, "totalRegistered", &totalRegistered)
-	assert.Equal(t, 1, totalRegistered)
-
-	GetState(stub, "registered", &registered)
-	assert.True(t, registered[userID])
-
-	GetState(stub, "voters", &voters)
-	assert.Equal(t, 1, len(voters))
-	_, found := voters[userID]
-	assert.True(t, found)
+	name := "register"
+	deltaResultsIterator, _ := stub.GetStateByPartialCompositeKey("varName~userID~txID", []string{name})
+	assert.True(t, deltaResultsIterator.HasNext())
 }
