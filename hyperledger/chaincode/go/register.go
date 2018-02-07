@@ -37,7 +37,9 @@ func (s *SmartContract) register(stub shim.ChaincodeStubInterface, args []string
 		if compositePutErr != nil {
 			return shim.Error(fmt.Sprintf("Could not put registration for %s in the ledger: %s", userID, compositePutErr.Error()))
 		}
+		return shim.Success(nil)
 	}
 
-	return shim.Success(nil)
+	return shim.Error("User " + userID + " is not eligible")
+
 }
