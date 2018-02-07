@@ -88,11 +88,9 @@ function drawGraph(result){
       ],
     }
   ];
-  var labels = [];
-  $(result.Votes).each(function(index, _){
-    datasets[0].data.push(result.Votes[index]);
-    labels.push('test'+index);
-  });
+  var labels = [ 'NO', 'YES' ];
+
+  datasets[0].data = Object.values(result.Votes);
   var ctx = document.getElementById("results");
   var formatedData = {
       datasets: datasets,
