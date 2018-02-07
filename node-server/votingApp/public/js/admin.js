@@ -55,10 +55,8 @@ function finishRegistration() {
 }
 
 function tally() {
-  $.ajax({
-          type: "POST",
-          url: '/voting/tallyVote',
-          data: {}
+  $.get('/voting/getTally', function(data) {
+    //data.tally;
   });
 
   document.getElementById('castfs').hidden = true;

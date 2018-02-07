@@ -44,6 +44,7 @@
 
                      <label for="userID">User ID:</label> <input id="userID" type="text" />
                      <input id="registerbutton" class="action-button" type="button" value="Register" onclick="register();">
+                     <input hidden id="tovotebutton" class="action-button" type="button" value="Vote now!" onclick="tovote();">
                   </div>
               </div>
           </fieldset>
@@ -86,6 +87,12 @@
                 }
         });
 
+        document.getElementById('registerbutton').hidden = true;
+        document.getElementById('userID').disabled = true;
+        document.getElementById('tovotebutton').removeAttribute('hidden');
+      }
+
+      function tovote() {
         document.getElementById('registerfs').style.display = 'none';
         document.getElementById('votefs').style.display = 'block';
         $('#progressbar li').removeClass('active');

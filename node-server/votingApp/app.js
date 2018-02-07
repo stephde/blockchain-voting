@@ -41,22 +41,29 @@ app.get('/:name', function (req, res, next) {
 
 app.post('/voting/initVote', function(req, res, next) {
   hyperledger.initVote();
+  res.sendStatus(200);
 });
-app.post('/voting/getTally', function(req, res, next){
-  hyperledger.queryAll();
+app.get('/voting/getTally', function(req, res, next){
+  hyperledger.queryAll().then(function (results) {
+    console.log(results);
+    res.json({  tally: results });
+  })
 });
 
 app.post('/voting/setEligible', function(req, res, next) {
   hyperledger.setEligible(req.body.eligibleUsers);
+  res.sendStatus(200);
 });
 
 app.post('/voting/beginSignUp', function(req, res, next) {
   hyperledger.beginSignUp(req.body.votingQuestion);
+  res.sendStatus(200);
 });
 
 app.post('/voting/registerUser', function(req, res, next) {
   // todo: check if eligible
   hyperledger.register(req.body.userID);
+  res.sendStatus(200);
 });
 
 app.get('/voting/question', function(req, res, next) {
@@ -67,11 +74,13 @@ app.get('/voting/question', function(req, res, next) {
 
 app.post('/voting/finishRegistrationPhase', function(req, res, next) {
   hyperledger.finishRegistrationPhase();
+  res.sendStatus(200);
 });
 
 app.post('/voting/submitVote', function(req, res, next) {
   hyperledger.submitVote(req.body.userID, req.body.vote);
-})
+  res.sendStatus(200);
+});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

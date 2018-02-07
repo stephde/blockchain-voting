@@ -22,7 +22,7 @@ Hyperledger = function(){
   }
 
   _this.queryAll = function(){
-    return query.executeQuery(_this.client, _this.channel, 'queryVotes', [''], defaultUserId);
+    return query.executeQuery(_this.client, _this.channel, 'computeTally', [''], defaultUserId);
   }
 
   _this.registerUser = function(user) {
@@ -61,7 +61,7 @@ Hyperledger = function(){
 
   _this.setEligible = function (userIds) {
       console.log("Setting eligible voters to: \n" + userIds)
-      return invoke.invokeTransaction(_this.hlAdapter.client, _this.channel, 'setEligible', [userIds], defaultUserId)
+      return invoke.invokeTransaction(_this.hlAdapter.client, _this.channel, 'setEligible', userIds, defaultUserId)
   }
 
   _this.registerForVote = function (userId) {
@@ -69,11 +69,6 @@ Hyperledger = function(){
       console.log("Registering user - " + userId + " - for vote...")
       //ToDo: what is up with the arguments? and what is the 4th argument?
       return invoke.invokeTransaction(_this.client, _this.channel, 'register', [userId], defaultUserId)
-  }
-
-  _this.finishRegistrationPhase = function () {
-      console.log("Finishing registration phase...")
-      return invoke.invokeTransaction(_this.client, _this.channel, 'finishRegistrationPhase', [], defaultUserId)
   }
 
   _this.question = function(){
