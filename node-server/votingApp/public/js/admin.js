@@ -1,8 +1,12 @@
+var overlay = $('#overlay');
 function initVote() {
+  overlay.show();
   $.ajax({
           type: "POST",
           url: '/voting/initVote',
           data: {}
+  }).done(function(){
+    overlay.hide();
   });
 
   document.getElementById('initVoteBtn').disabled = true;
@@ -11,13 +15,15 @@ function initVote() {
 
 function setEligible() {
   var eligibleUsers = document.getElementById('addresses').value.split(',')
-
+  overlay.show();
   $.ajax({
           type: "POST",
           url: '/voting/setEligible',
           data: {
             'eligibleUsers': eligibleUsers
           }
+  }).done(function(){
+    overlay.hide();
   });
 
   document.getElementById('registrationSetQuestion').removeAttribute('hidden');
@@ -25,6 +31,7 @@ function setEligible() {
 
 function beginRegistration() {
   var votingQuestion = document.getElementById('questioninput').value;
+  overlay.show();
 
   $.ajax({
           type: "POST",
@@ -32,6 +39,8 @@ function beginRegistration() {
           data: {
             votingQuestion: votingQuestion
           }
+  }).done(function(){
+    overlay.hide();
   });
 
   document.getElementById('setupfs').hidden = true;
@@ -41,10 +50,13 @@ function beginRegistration() {
 }
 
 function finishRegistration() {
+  overlay.show();
   $.ajax({
           type: "POST",
           url: '/voting/finishRegistrationPhase',
           data: {}
+  }).done(function(){
+    overlay.hide();
   });
 
   document.getElementById('registerfs').hidden = true;
@@ -55,9 +67,6 @@ function finishRegistration() {
 }
 
 function tally() {
-  $.get('/voting/getTally', function(data) {
-    //data.tally;
-  });
 
   document.getElementById('castfs').hidden = true;
   document.getElementById('tallyfs').removeAttribute('hidden');
@@ -68,11 +77,13 @@ function tally() {
 }
 
 function initResults(){
+  overlay.show();
   $.ajax({
     type: "GET",
     url: "/voting/getTally"
   }).done(function(result){
     drawGraph(result);
+    overlay.hide();
   });
 }
 

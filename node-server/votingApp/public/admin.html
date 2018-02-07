@@ -13,6 +13,8 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <!-- Custom styles for this template -->
     <link href="css/starter-template.css" rel="stylesheet">
+
+    <link href="css/fontawesome-all.css" rel="stylesheet">
     <link href="css/jquery.datetimepicker.css" rel="stylesheet">
     <link href="css/admin.css" rel="stylesheet">
   </head>
@@ -83,7 +85,7 @@
         </fieldset>
 
         <div id="show-results">
-          <canvas id="results" width="400" height="400"></canvas>
+          <canvas hidden id="results" width="400" height="400"></canvas>
         </div>
 
         <fieldset hidden id="tallyfs">
@@ -92,6 +94,12 @@
       </div>
     </div>
 
+    <div hidden id='overlay'>
+      <div class='fa-6x'>
+        <i class="fas fa-sync fa-spin"></i>
+
+      </div>
+    </div>
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
@@ -102,8 +110,5 @@
     <script src="js/bignumber.min.js"></script>
     <script src="js/admin.js"></script>
     <script src="js/jquery.datetimepicker.js"></script>
-
-<script>
-
-
-</script>
+  </body>
+</html>
