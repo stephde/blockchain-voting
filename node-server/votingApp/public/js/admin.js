@@ -64,17 +64,7 @@ function tally() {
   $('#progressbar li').removeClass('active');
   $('#progressbar li:eq(3)').addClass('active');
   initResults();
-  var result = [
-    { 'Record': {
-        'count': 20,
-        'name': 'Yes'
-    }},
-    { 'Record': {
-        'count': 5,
-        'name': 'No'
-    }}
-  ];
-  drawGraph(result);
+
 }
 
 function initResults(){
@@ -99,9 +89,9 @@ function drawGraph(result){
     }
   ];
   var labels = [];
-  $(result).each(function(_, option){
-    datasets[0].data.push(option.Record.count);
-    labels.push(option.Record.name);
+  $(result.Votes).each(function(index, _){
+    datasets[0].data.push(result.Votes[index]);
+    labels.push('test'+index);
   });
   var ctx = document.getElementById("results");
   var formatedData = {

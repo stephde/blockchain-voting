@@ -46,7 +46,8 @@ app.post('/voting/initVote', function(req, res, next) {
 app.get('/voting/getTally', function(req, res, next){
   hyperledger.queryAll().then(function (results) {
     console.log(results);
-    res.json({  tally: results });
+    res.setHeader('Content-Type', 'application/json');
+    res.send(results.toString('utf8'));
   })
 });
 
