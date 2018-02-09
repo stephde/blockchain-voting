@@ -62,12 +62,14 @@ Hyperledger = function(){
   _this.registerForVote = function (userId) {
       //ToDo: is the userId implicit?
       console.log("Registering user - " + userId + " - for vote...")
+      //ToDo: what is up with the arguments? and what is the 4th argument?
       return invoke.invokeTransaction(_this.client, _this.channel, 'register', [userId], defaultUserId)
   }
 
   _this.computeTally = function () {
       console.log("Computing the tally...")
-      return query.executeQuery(_this.client, _this.channel, 'computeTally', [], defaultUserId);
+      //ToDo: is this a query or an invocation?
+      return invoke.invokeTransaction(_this.client, _this.channel, 'computeTally', [], defaultUserId)
   }
 
   _this.vote = function(userId, selectedOption) {

@@ -6,56 +6,49 @@ let Hyperledger = require("./hyperledger.js");
 let hyperledger = new Hyperledger();
 
 function runElection() {
-    const numOfUsers = 100;
+    const numOfUsers = 10;
+
     let userIds = []
     for (let i=0; i < numOfUsers; i++) {
         userIds.push("user" + i);
     }
 
-    let start;
-
     runFuncParallelForUsers((userId) => hyperledger.registerUser({id: userId}), userIds)
-        .then(() => hyperledger.initVote())
-        .then(() => hyperledger.setEligible(userIds))
-        .then(() => hyperledger.beginSignUp("Do you like Blockchain?"))
-        .then(() => runFuncParallelForUsers(
-                (userId) => hyperledger.registerForVote(userId), userIds))
-        .then(() => promisedTimeout(5000))
-        .then(() => hyperledger.finishRegistrationPhase())
-        .then(() => start = new Date().getTime())
-        .then(() => runFuncParallelForUsers(
-                (userId) => hyperledger.vote(userId, '1'), userIds))
-        .then(() => promisedTimeout(3000))
-        .then(() => hyperledger.computeTally())
-        .then(() => printTimeSince(start, 'voting phase'))
-        .catch(console.log)
+        .then(() => timedCall(hyperledger.initVote, [], 'Init Vote'))
+        .then(() => timedCall(hyperledger.setEligible, userIds, 'Set Eligible'))
+        .then(() => timedCall(hyperledger.beginSignUp, "Do you like Blockchain?", 'begin sign up'))
+        .then(() => timedCall(() => runFuncParallelForUsers((userId) => hyperledger.registerForVote(userId), userIds), [], 'register for vote'))
+        .then(() => timedCall(hyperledger.finishRegistrationPhase, [], 'finishRegistrationPhase'))
+        .then(() => timedCall(() => runFuncParallelForUsers((userId) => hyperledger.vote(userId, '0'), userIds), [], 'voting'))
+        .then(() => timedCall(hyperledger.computeTally, [], "compute tally"))
+        .then(console.log, console.log)
 }
 
-function printTimeSince(start, identifier){
-    let end = new Date().getTime();
-    console.log("\n\n###########################\n\n")
-    console.log("Total time for " + identifier + " is " + (end-start) + " ms")
-    console.log("\n\n###########################\n\n")
-
-    return Promise.resolve();
+function timedCall(func, params, identifier){
+  var start = new Date().getTime();
+  var promise = func(params);
+  var end = new Date().getTime();
+  var totalTime = end-start;
+  console.log("Time spend for "+identifier + ": "+ totalTime+ "ms")
+  return promise;
 }
 
-async function runFuncParallelForUsers(func, userIds) {
+function runFuncParallelForUsers(func, userIds) {
     let promises = [];
 
     let index;
     for (index in userIds) {
-        await promisedTimeout(50)
         promises.push(func(userIds[index]))
     }
 
     return Promise.all(promises);
 }
 
-// promisified version of setTimeOut
-function promisedTimeout(ms) {
-    console.log("Waiting for " + ms + "ms ...")
-    return new Promise(resolve => setTimeout(resolve, ms));
+function runFuncForUsers(func, userIds) {
+    let index;
+    for (index in userIds) {
+        func(userIds[index])
+    }
 }
 
 runElection();
