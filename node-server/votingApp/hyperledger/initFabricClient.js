@@ -10,8 +10,6 @@ exports.initFabricClient = function (host, channelId) {
     // setup the fabric network
     let channel = fabricClient.newChannel(channelId); //
     let peer = fabricClient.newPeer(host);
-    // peer.setName("peerio")
-    // console.log('####################\n\n Setting peer name to - ' + peer.getName() + '\n')
     channel.addPeer(peer);
     let order = fabricClient.newOrderer('grpc://localhost:7050')
     channel.addOrderer(order);
