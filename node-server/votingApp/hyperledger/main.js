@@ -17,21 +17,35 @@ function runElection() {
 
     // runFuncParallelForUsers((userId) => hyperledger.registerUser({id: userId}), userIds)
     hyperledger.initVote()
+        .then(() => waitForTransactions())
         .then(() => hyperledger.setEligible(userIds))
+        .then(() => waitForTransactions())
         .then(() => hyperledger.beginSignUp("Do you like Blockchain?"))
+        .then(() => waitForTransactions())
         .then(() => runFuncParallelForUsers(
                 (userId) => hyperledger.registerForVote(userId), userIds))
-        .then(() => promisedTimeout(5000))
+        .then(() => waitForTransactions())
         .then(() => hyperledger.finishRegistrationPhase())
+        .then(() => waitForTransactions())
         .then(() => start = new Date().getTime())
         .then(() => runFuncParallelForUsers(
                 (userId) => hyperledger.vote(userId, '1'), userIds))
-        .then(() => promisedTimeout(3000))
+        .then(() => waitForTransactions())
         .then(() => printTimeSince(start, 'voting phase'))
         .then(() => hyperledger.computeTally())
-        .then(() => promisedTimeout(2000))
+        .then(() => waitForTransactions())
         .then(() => hyperledger.close())
         .catch(console.log)
+}
+
+async function waitForTransactions() {
+    while(true) {
+        if(hyperledger.isTransactionPending()){
+            await promisedTimeout(500)
+            continue;
+        }
+        break;
+    }
 }
 
 function printTimeSince(start, identifier){
