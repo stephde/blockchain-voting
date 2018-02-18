@@ -9,7 +9,7 @@
  */
 
 let Fabric_CA_Client = require('fabric-ca-client');
-let HyperledgerUtils = require("./hyperledergerUtils");
+let HyperledgerUtils = require("./hyperledgerUtils");
 let fabric_ca_client = null;
 let admin_user = null;
 let member_user = null;

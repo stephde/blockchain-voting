@@ -3,7 +3,7 @@
  */
 
 let Fabric_Client = require('fabric-client');
-let HyperledgerUtils = require("./hyperledergerUtils");
+let HyperledgerUtils = require("./hyperledgerUtils");
 
 exports.initFabricClient = function (host, channelId, userId, onTransactionCommitted) {
     let fabricClient = new Fabric_Client();

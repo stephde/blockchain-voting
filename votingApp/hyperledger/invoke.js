@@ -3,7 +3,7 @@
  */
 
 let util = require('util');
-let HyperledgerUtils = require("./hyperledergerUtils");
+let HyperledgerUtils = require("./hyperledgerUtils");
 
 let tx_Id = null;
 let _onTransactionSubmitted = null;

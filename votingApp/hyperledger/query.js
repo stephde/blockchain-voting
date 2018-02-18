@@ -1,6 +1,6 @@
 'use strict';
 
-let HyperledgerUtils = require("./hyperledergerUtils");
+let HyperledgerUtils = require("./hyperledgerUtils");
 
 /**
  * This function executes a query against the given hyperledger client and returns a promise which
