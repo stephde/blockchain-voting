@@ -6,6 +6,7 @@ let util = require('util');
 let HyperledgerUtils = require("./hyperledergerUtils");
 
 let tx_Id = null;
+let _onTransactionSubmitted = null;
 
 /**
  * This function invokes a transaction on hypeledger with the given parameters.
@@ -15,6 +16,8 @@ let tx_Id = null;
  *      fabric client to execute transaction on
  * @param channel
  *      actual channel object to invoke transaction on
+ * @param onTransactionSubmitted
+ *      function which is to be called when a transaction was submitted
  * @param transactionFunc
  *      query function identifier as string, which refers to the chaincode method
  * @param args
@@ -23,8 +26,10 @@ let tx_Id = null;
  *      id of the user who is trying to execute the transaction
  * @returns {Promise.<TResult>}
  */
-exports.invokeTransaction = function (fabricClient, channel, transactionFunc, args, userId) {
+exports.invokeTransaction = function (fabricClient, channel, onTransactionSubmitted, transactionFunc, args, userId) {
     // create the key value store as defined in the fabric-client/config/default.json 'key-value-store' setting
+
+    _onTransactionSubmitted = onTransactionSubmitted;
 
     return HyperledgerUtils.createDefaultKeyValueStore().then((stateStore) => {
         // assign the store to the fabric client
@@ -33,12 +38,10 @@ exports.invokeTransaction = function (fabricClient, channel, transactionFunc, ar
         // creates the default cryptoStore and adds it to the client
         HyperledgerUtils.createDefaultCryptoKeyStore(fabricClient);
 
-        // TODO replace string
         return fabricClient.getUserContext(userId, true);
     }).then((userFromStore) => {
         if (userFromStore && userFromStore.isEnrolled()) {
-      		//console.log('Successfully loaded user1 from persistence');
-      		let member_user = userFromStore;
+      		console.log('Successfully loaded user1 from persistence');
       	} else {
       		throw new Error('Failed to get user1.... run registerUser.js');
       	}
@@ -90,16 +93,16 @@ function proposeTransaction(fabricClient, channel, transactionFunc, args) {
 }
 
 function handleResponse(response) {
-    console.log('Send transaction promise and event listener promise have completed');
+    // console.log('Send transaction promise and event listener promise have completed');
     // check the results in the order the promises were added to the promise all list
     if (response && response[0] && response[0].status === 'SUCCESS') {
-        console.log('Successfully sent transaction to the orderer.');
+        // console.log('Successfully sent transaction to the orderer.');
     } else {
         console.error('Failed to order the transaction. Error code: ' + response.status);
     }
 
     if(response && response[1] && response[1].event_status === 'VALID') {
-        console.log('Successfully committed the change to the ledger by the peer');
+        // console.log('Successfully committed the change to the ledger by the peer');
     } else {
         console.log('Transaction failed to be committed to the ledger due to ::'+response[1].event_status);
     }
@@ -112,9 +115,9 @@ function checkProposalResponse(proposalResponses) {
     if (proposalResponses && proposalResponses[0].response && proposalResponses[0].response.status === 200) {
         isProposalGood = true;
 
-        console.log(util.format(
-            'Successfully sent Proposal and received ProposalResponse: Status - %s, message - "%s"',
-            proposalResponses[0].response.status, proposalResponses[0].response.message));
+        // console.log(util.format(
+        //     'Successfully sent Proposal and received ProposalResponse: Status - %s, message - "%s"',
+        //     proposalResponses[0].response.status, proposalResponses[0].response.message));
     }
 
     if( ! isProposalGood) {
@@ -123,53 +126,11 @@ function checkProposalResponse(proposalResponses) {
     }
 }
 
-//ToDo: refactor this function
 function sendTransaction(fabricClient, channel, request) {
-    // set the transaction listener and set a timeout of 30 sec
-    // if the transaction did not get committed within the timeout period,
-    // report a TIMEOUT status
     let transaction_id_string = tx_Id.getTransactionID(); //Get the transaction ID string to be used by the event processing
-    let promises = [];
-
     let sendPromise = channel.sendTransaction(request);
-    promises.push(sendPromise); //we want the send transaction first, so that we know where to check status
 
-    // get an eventhub once the fabric client has a user assigned. The user
-    // is required bacause the event registration must be signed
-    let event_hub = fabricClient.newEventHub();
-    event_hub.setPeerAddr('grpc://localhost:7053');
+    _onTransactionSubmitted(transaction_id_string);
 
-    // using resolve the promise so that result status may be processed
-    // under the then clause rather than having the catch clause process
-    // the status
-    let txPromise = new Promise((resolve, reject) => {
-        let handle = setTimeout(() => {
-            event_hub.disconnect();
-            resolve({event_status : 'TIMEOUT'}); //we could use reject(new Error('Trnasaction did not complete within 30 seconds'));
-        }, 3000);
-        event_hub.connect();
-        event_hub.registerTxEvent(transaction_id_string, (tx, code) => {
-            // this is the callback for transaction event status
-            // first some clean up of event listener
-            clearTimeout(handle);
-            event_hub.unregisterTxEvent(transaction_id_string);
-            event_hub.disconnect();
-
-            // now let the application know what happened
-            let return_status = {event_status : code, tx_id : transaction_id_string};
-            if (code !== 'VALID') {
-                console.error('The transaction was invalid, code = ' + code);
-                resolve(return_status); // we could use reject(new Error('Problem with the tranaction, event status ::'+code));
-            } else {
-                console.log('The transaction has been committed on peer ' + event_hub._ep._endpoint.addr);
-                resolve(return_status);
-            }
-        }, (err) => {
-            //this is the callback if something goes wrong with the event registration or processing
-            reject(new Error('There was a problem with the eventhub ::'+err));
-        });
-    });
-    promises.push(txPromise);
-
-    return Promise.all(promises);
+    return sendPromise;
 }
