@@ -101,3 +101,20 @@ func Test_End2End_Test(t *testing.T) {
 	expectedResult, _ := json.Marshal(Result{3, map[int]int{0: 1, 1: 2}})
 	checkQuery(t, stub, "computeTally", string(expectedResult))
 }
+
+func Test_End2End2(t *testing.T) {
+	stub := shim.NewMockStub("test_invalid_question", new(SmartContract))
+
+	checkInvoke(t, stub, [][]byte{[]byte("initVote")})
+
+	checkInvoke(t, stub, [][]byte{[]byte("setEligible"), []byte("a"), []byte("b"), []byte("c")})
+
+	checkInvoke(t, stub, [][]byte{[]byte("beginSignUp"), []byte("Yes?")})
+
+	checkInvoke(t, stub, [][]byte{[]byte("register"), []byte("a")})
+	checkInvoke(t, stub, [][]byte{[]byte("register"), []byte("b")})
+	checkInvoke(t, stub, [][]byte{[]byte("register"), []byte("c")})
+
+	checkInvoke(t, stub, [][]byte{[]byte("finishRegistrationPhase")})
+
+}
