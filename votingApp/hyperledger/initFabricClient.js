@@ -5,20 +5,24 @@
 let Fabric_Client = require('fabric-client');
 let HyperledgerUtils = require("./hyperledgerUtils");
 
+const ordererPort = ':7050';
+const peerPort = ':7051';
+const eventHubPort = ':7053';
+
 exports.initFabricClient = function (host, channelId, userId, onTransactionCommitted) {
     let fabricClient = new Fabric_Client();
 
     // setup the fabric network
     let channel = fabricClient.newChannel(channelId); //
-    let peer = fabricClient.newPeer(host);
+    let peer = fabricClient.newPeer(host + peerPort);
     channel.addPeer(peer);
-    let order = fabricClient.newOrderer('grpc://localhost:7050')
+    let order = fabricClient.newOrderer(host + ordererPort);
     channel.addOrderer(order);
 
     // get an eventhub once the fabric client has a user assigned. The user
     // is required bacause the event registration must be signed
     let eventHub = fabricClient.newEventHub();
-    eventHub.setPeerAddr('grpc://localhost:7053');
+    eventHub.setPeerAddr(host + eventHubPort);
 
     let blockListenerId = null;
     initUserContext(fabricClient, userId)

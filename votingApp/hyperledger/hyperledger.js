@@ -10,7 +10,7 @@ Hyperledger = function() {
         client,
         _this = this;
 
-  const host = 'grpc://localhost:7051';
+  const host = 'grpc://localhost';
   const channelId = 'mychannel';
   const defaultUserId = 'user1';
 
