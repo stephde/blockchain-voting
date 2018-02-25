@@ -1,4 +1,4 @@
-# Liquid Voting Client
+# Blockchain Voting Client
 
 ## Installation
 
@@ -9,10 +9,9 @@ Install hyperledger and start the network. (Follow Installation instructions und
 ## Running the App
 
 To start the webserver run:
-`sudo npm start`
-Sudo ist required since the app uses port 80.
+`npm start`
 
-Open your http://localhost with your Browser to access the app. 
+Open your http://localhost:3000 with your Browser to access the app. 
 
 ## Hyperledger Client
 

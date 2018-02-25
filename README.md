@@ -7,9 +7,10 @@ It features a private blockchain using the [Hyperledger Fabric](https://www.hype
 ## Getting started
 
 1. Run `./setup.sh` to install platform-specific Docker images.
-   **macOS:** run `brew tap hyperledger/fabric && brew install fabric-tools`.
+    **macOS:** run `brew tap hyperledger/fabric && brew install fabric-tools`.
 2. In `/hyperledger`: Run `./generate` to setup cryptographic material and `./start.sh` to start Docker containers and the Hyperledger network.
 3. In `/votingApp`: Run  `npm install` and `npm start`
+4. Open `localhost:3000` in your browser to access the administration and voting interface.
 
 ## Background
 
