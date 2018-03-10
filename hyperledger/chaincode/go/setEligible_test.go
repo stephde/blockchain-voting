@@ -31,4 +31,5 @@ func Test_SetEligible(t *testing.T) {
 	assert.True(t, eligible["a"])
 	assert.True(t, eligible["b"])
 	assert.True(t, eligible["c"])
+	assert.False(t, eligible["d"])
 }

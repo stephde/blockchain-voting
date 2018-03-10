@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="Open Vote Network on Ethereum">
+    <meta name="author" content="Paddy">
+    <title>Admin Page</title>
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="css/starter-template.css" rel="stylesheet">
+
+    <link href="css/fontawesome-all.css" rel="stylesheet">
+    <link href="css/jquery.datetimepicker.css" rel="stylesheet">
+    <link href="css/admin.css" rel="stylesheet">
+  </head>
+
+  <body>
+      <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <a class="navbar-brand" href="#">Blockchain Voting</a>
+          </div>
+          <ul class="nav navbar-nav">
+            <li><a href="index.html">Voting</a></li>
+            <li class="active"><a href="admin.html">Admin</a></li>
+          </ul>
+        </div>
+      </nav>
+
+    <div class="container">
+      <ul id="progressbar" style="margin-left:300px;">
+          <li id="pb_setup" class="active">Set up</li>
+          <li id="pb_register">Register</li>
+          <!-- <li id="pb_commit">Commit</li> -->
+          <li id="pb_cast">Cast</li>
+          <li id="pb_tally">Tally</li>
+      </ul>
+      <div class="jumbotron">
+        <fieldset id="setupfs">
+
+          <h2 id="title">Election Configuration</h2>
+          <p id="section_desc"></p>
+          <p id="question"></p>
+          <div hidden id="login">
+             <div id='dropdown'></div>
+          </div>
+
+          <button onclick="initVote()" class="btn btn-success" id="initVoteBtn">Start new vote!</button>
+
+          <div hidden id="eligible">
+            <p id="eligible_area">
+              <label for="addresses">Eligible userIDs:</label>
+              <textarea id="addresses" name="list" class="form-control" rows="5"></textarea>
+              <br>
+              <button onclick="setEligible()" class="btn btn-primary" id="addressesBtn">Update eligibility list</button>
+            </p>
+          </div>
+
+          <div hidden id="registrationSetQuestion">
+            <p>Question:  <input type='text' id='questioninput' value=''/> </p>
+            <p id="beginRegistrationbutton"><button onclick="beginRegistration()" class="btn btn-primary" id="beginregistrationBtn">Begin Registration Phase</button></p>
+          </div>
+
+        </fieldset>
+
+        <fieldset hidden id="registerfs">
+          <p>Waiting for registrations ...</p>
+          <div id="finishRegistration">
+                <button class="btn btn-primary" onclick="finishRegistration()" id="finishRegistrationBtn">Finish Registration Phase</button>
+          </div>
+        </fieldset>
+
+        <fieldset hidden id="castfs">
+          <div id="tallydiv">
+                <p>Waiting for votes ...</p>
+                <br />
+                <button onclick="tally()" class="btn btn-primary">Tally election</button>
+                <br />
+          </div>
+        </fieldset>
+
+        <div id="show-results">
+          <canvas hidden id="results" width="400" height="400"></canvas>
+        </div>
+
+        <fieldset hidden id="tallyfs">
+          <button onclick="window.location.reload()" class="btn btn-success">Start a new vote</button>
+        </fieldset>
+      </div>
+    </div>
+
+    <div hidden id='overlay'>
+      <div class='fa-6x'>
+        <i class="fas fa-sync fa-spin"></i>
+
+      </div>
+    </div>
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="js/jquery.min.js"></script>
+    <script src="js/Chart.bundle.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/bignumber.min.js"></script>
+    <script src="js/notify.js"></script>
+
+    <script src="js/admin.js"></script>
+    <script src="js/jquery.datetimepicker.js"></script>
+
+  </body>
+</html>

@@ -1,0 +1,24 @@
+{
+  "name": "votingapp",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "chart.js": "^2.7.1",
+    "cookie-parser": "~1.4.3",
+    "crypto": "^1.0.1",
+    "debug": "~2.6.9",
+    "express": "~4.15.5",
+    "fabric-ca-client": "^1.0.3",
+    "fabric-client": "^1.0.3",
+    "morgan": "~1.9.0",
+    "noty": "^3.2.0-beta",
+    "pug": "2.0.0-beta11",
+    "secp256k1": "^3.4.0",
+    "serve-favicon": "~2.4.5",
+    "sha256": "^0.2.0"
+  }
+}
