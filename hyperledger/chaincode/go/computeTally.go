@@ -9,6 +9,9 @@ import (
 	sc "github.com/hyperledger/fabric/protos/peer"
 )
 
+/*
+ * After all votes has been cast this function computes the tally.
+ */
 func (s *SmartContract) computeTally(stub shim.ChaincodeStubInterface) sc.Response {
 
 	if !s.inState(stub, VOTE) {

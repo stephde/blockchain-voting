@@ -7,6 +7,9 @@ import (
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
+/*
+ * Retrieves a value from Hyperledger's state
+ */
 func GetState(stub shim.ChaincodeStubInterface, name string, v interface{}) error {
 	bytes, err := stub.GetState(name)
 	if err != nil {
@@ -19,6 +22,9 @@ func GetState(stub shim.ChaincodeStubInterface, name string, v interface{}) erro
 	return json.Unmarshal(bytes, &v)
 }
 
+/*
+ * Stores a value in Hyperledger's state
+ */
 func PutState(stub shim.ChaincodeStubInterface, name string, v interface{}) error {
 	bytes, err := json.Marshal(v)
 

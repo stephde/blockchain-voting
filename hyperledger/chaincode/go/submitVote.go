@@ -7,6 +7,10 @@ import (
 	sc "github.com/hyperledger/fabric/protos/peer"
 )
 
+/*
+ * This function casts a vote that was submitted to Hyperledger.
+ * Expects userID and vote (not encrypted in this version)
+ */
 func (s *SmartContract) submitVote(stub shim.ChaincodeStubInterface, args []string) sc.Response {
 	if !s.inState(stub, VOTE) {
 		return shim.Error("Wrong state, expected VOTE")
@@ -20,9 +24,12 @@ func (s *SmartContract) submitVote(stub shim.ChaincodeStubInterface, args []stri
 	userID := args[0]
 	vote := args[1]
 
-	registerName := "register"
+	/*
+	 * Make sure the sender can vote and hasn't already voted.
+	 * Check is done by querying two CompositeKeys
+	 */
 
-	// Make sure the sender can vote and hasn't already voted
+	registerName := "register"
 	registerResultsIterator, registerErr := stub.GetStateByPartialCompositeKey("varName~userID~txID", []string{registerName, userID})
 	if registerErr != nil {
 		return shim.Error(fmt.Sprintf("Could not retrieve value for %s: %s", registerName, registerErr.Error()))
@@ -31,7 +38,6 @@ func (s *SmartContract) submitVote(stub shim.ChaincodeStubInterface, args []stri
 
 	votecastCompositeIndex := "varName~userID~txID"
 	votecastName := "votecast"
-
 	deltaResultsIterator, deltaErr := stub.GetStateByPartialCompositeKey(votecastCompositeIndex, []string{votecastName, userID})
 	if deltaErr != nil {
 		return shim.Error(fmt.Sprintf("Could not retrieve value for %s: %s", votecastName, deltaErr.Error()))
@@ -48,7 +54,11 @@ func (s *SmartContract) submitVote(stub shim.ChaincodeStubInterface, args []stri
 		return shim.Error(userID + " is not allowed to vote - already voted")
 	}
 
-	// TODO: userID could be voting key and vote could be ZKP encrypted
+	/*
+	 * For the crypto version:
+	 * userID would be personal voting key
+	 * vote would be encrypted zero-knowledge proof
+	 */
 	compositeIndexName := "varName~userID~vote~txID"
 	name := "vote"
 	compositeKey, compositeErr := stub.CreateCompositeKey(compositeIndexName, []string{name, userID, vote, txid})
@@ -62,7 +72,7 @@ func (s *SmartContract) submitVote(stub shim.ChaincodeStubInterface, args []stri
 		return shim.Error(fmt.Sprintf("Could not put operation for %s in the ledger: %s", name, compositePutErr.Error()))
 	}
 
-	// Saving votecast
+	// Vote has been stored, now save votecast for this user
 	votecastCompositeKey, votecastCompositeErr := stub.CreateCompositeKey(votecastCompositeIndex, []string{votecastName, userID, txid})
 	if votecastCompositeErr != nil {
 		return shim.Error(fmt.Sprintf("Could not create a composite key for %s: %s", votecastName, votecastCompositeErr.Error()))

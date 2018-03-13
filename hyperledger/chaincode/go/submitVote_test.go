@@ -25,7 +25,6 @@ func Test_SubmitVote(t *testing.T) {
 	assert.True(t, deltaResultsIterator.HasNext())
 }
 
-/*
 func Test_InvalidUserID(t *testing.T) {
 	stub := shim.NewMockStub("test_submitVote", new(SmartContract))
 
@@ -52,4 +51,3 @@ func Test_DuplicateVote(t *testing.T) {
 
 	checkFailingInvoke(t, stub, [][]byte{[]byte("submitVote"), []byte(userID), []byte(strconv.Itoa(1))})
 }
-*/
