@@ -74,8 +74,16 @@ It is a small bash script that uses Hyperledger's CLI.
 
 ### How tun run benchmarks
 
-*TODO*
+Enable the end-to-end unit tests in the chaincode directory on the respective branch to run a timed vote with and without crypto.
+
+Run `benchmark-voting.sh` to conduct a vote on a Hyperledger instance.
+As part of our project we tested this file the Docker containers that Hyperledger provides.
 
 ### Results
 
-*todo*
+Since Hyperledger does not provide an implementation of a consensus protocol as of now, we only run the tests with a single Orderer node.
+In the dockerized setting we were able to reach a throughput of about 80 transactions per second on a MacBook Pro.
+Obviously Hyperledger offers lots of options to tune its performance, so there is a good chance that we might be able to increase the throughput in the future.
+
+We noticed that the throughput was mainly limited by Hyperledger's event hub, which lost some transactions when sending too many transactions in a short amount of time.
+Within the span of the project we were not able to fix this properly.
