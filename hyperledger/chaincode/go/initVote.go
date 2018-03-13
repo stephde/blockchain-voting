@@ -7,6 +7,10 @@ import (
 	sc "github.com/hyperledger/fabric/protos/peer"
 )
 
+/*
+ * Initializes a new vote.
+ * Deletes state that belongs to a previous vote.
+ */
 func (s *SmartContract) initVote(stub shim.ChaincodeStubInterface) sc.Response {
 	PutState(stub, "state", SETUP)
 	PutState(stub, "eligible", map[string]bool{})
@@ -20,6 +24,9 @@ func (s *SmartContract) initVote(stub shim.ChaincodeStubInterface) sc.Response {
 	return shim.Success(nil)
 }
 
+/*
+ * Helper function to delete a composite key from Hyperledger
+ */
 func (s *SmartContract) deleteCompositeKey(stub shim.ChaincodeStubInterface, compositeKey string, name string) sc.Response {
 	deltaResultsIterator, deltaErr := stub.GetStateByPartialCompositeKey(compositeKey, []string{name})
 

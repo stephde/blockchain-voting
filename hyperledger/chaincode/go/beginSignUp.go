@@ -5,6 +5,9 @@ import (
 	sc "github.com/hyperledger/fabric/protos/peer"
 )
 
+/*
+ * Starts a vote by setting the question and Initializing the voting stage.
+ */
 func (s *SmartContract) beginSignUp(stub shim.ChaincodeStubInterface, args []string) sc.Response {
 	if !s.inState(stub, SETUP) {
 		return shim.Error("Wrong state, expected SETUP")

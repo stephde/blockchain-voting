@@ -7,6 +7,10 @@ import (
 	sc "github.com/hyperledger/fabric/protos/peer"
 )
 
+/*
+ * In the original voting protocol this stage is used to generate personal voting keys.
+ * In this non-crypto implementation it is only used to verify that there are some registered users.
+ */
 func (s *SmartContract) finishRegistrationPhase(stub shim.ChaincodeStubInterface) sc.Response {
 	if !s.inState(stub, SIGNUP) {
 		return shim.Error("Wrong state, expected SIGNUP")
@@ -25,24 +29,13 @@ func (s *SmartContract) finishRegistrationPhase(stub shim.ChaincodeStubInterface
 		return shim.Error(fmt.Sprintf("No variable by the name %s exists", name))
 	}
 
-	registered := map[string]struct{}{}
 	var i int
 	for i = 0; deltaResultsIterator.HasNext(); i++ {
 		// Get the next row
-		responseRange, nextErr := deltaResultsIterator.Next()
+		_, nextErr := deltaResultsIterator.Next()
 		if nextErr != nil {
 			return shim.Error(nextErr.Error())
 		}
-
-		// Split the composite key into its component parts
-		_, keyParts, splitKeyErr := stub.SplitCompositeKey(responseRange.Key)
-		if splitKeyErr != nil {
-			return shim.Error(splitKeyErr.Error())
-		}
-
-		// Retrieve the userID
-		userID := keyParts[1]
-		registered[userID] = struct{}{}
 	}
 
 	PutState(stub, "totalRegistered", i)
@@ -50,8 +43,6 @@ func (s *SmartContract) finishRegistrationPhase(stub shim.ChaincodeStubInterface
 		// Legacy from Anonymous Voting Protocol
 		return shim.Error("Too few voters registered, need at least 3")
 	}
-
-	PutState(stub, "registered", registered)
 
 	// Now we either enter the voting phase.
 	s.transitionToState(stub, VOTE)
