@@ -1,7 +1,10 @@
+.DS_Store
 .idea
 node-server/node_modules
+votingApp/node_modules
 node-server/package-lock.json
 node-server/hyperledger/hfc-key-store/
+node-server/votingApp/hyperledger/hfc-key-store
 platform-specific-binaries/
 fabric-test
 node-server/votingApp/node_modules
