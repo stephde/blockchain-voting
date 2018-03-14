@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/crypto"
@@ -11,60 +10,29 @@ import (
 
 func (s *SmartContract) finishRegistrationPhase(stub shim.ChaincodeStubInterface) sc.Response {
 	if !s.inState(stub, SIGNUP) {
-		return shim.Error("Wrong state, expected SIGNUP")
+		return shim.Error("Wrong state")
 	}
 
-	// Retrieve all registrations
-	name := "register"
-	deltaResultsIterator, deltaErr := stub.GetStateByPartialCompositeKey("varName~userID~txID", []string{name})
-	if deltaErr != nil {
-		return shim.Error(fmt.Sprintf("Could not retrieve value for %s: %s", name, deltaErr.Error()))
-	}
-	defer deltaResultsIterator.Close()
-
-	// Check the variable existed
-	if !deltaResultsIterator.HasNext() {
-		return shim.Error(fmt.Sprintf("No variable by the name %s exists", name))
-	}
-
-	// Calculate personal voting keys
-	voters := s.reconstructKeys(deltaResultsIterator)
-
-	// registered := map[string]struct{}{}
-	// var i int
-	// for i = 0; deltaResultsIterator.HasNext(); i++ {
-	// 	// Get the next row
-	// 	responseRange, nextErr := deltaResultsIterator.Next()
-	// 	if nextErr != nil {
-	// 		return shim.Error(nextErr.Error())
-	// 	}
-	//
-	// 	// Split the composite key into its component parts
-	// 	_, keyParts, splitKeyErr := stub.SplitCompositeKey(responseRange.Key)
-	// 	if splitKeyErr != nil {
-	// 		return shim.Error(splitKeyErr.Error())
-	// 	}
-	//
-	// 	// Retrieve the userID
-	// 	userID := keyParts[1]
-	// 	registered[userID] = struct{}{}
-	// }
-
-	if len(voters) < 3 {
-		// Legacy from Anonymous Voting Protocol, but makes sense since for two voters, each would know what the other one has voted
+	var totalRegistered int
+	GetState(stub, "totalRegistered", &totalRegistered)
+	if totalRegistered < 3 {
 		return shim.Error("Too few voters registered, need at least 3")
 	}
-	PutState(stub, "totalRegistered", i)
-	// Store slice here, since it won't be updated anymore
-	PutState(stub, "registered", voters)
 
-	// Now we either enter the voting phase.
+	var voters []Voter
+	GetState(stub, "voters", &voters)
+
+	voters = s.reconstructKeys(totalRegistered, voters)
+
+	// We have computed each voter's special voting key.
+	// Now we either enter the commitment phase (option) or voting phase.
 	s.transitionToState(stub, VOTE)
+	PutState(stub, "voters", voters)
 
-	return shim.Success(nil)
+	return shim.Success([]byte("Success"))
 }
 
-func (s *SmartContract) reconstructKeys(voterIterator shim.StateQueryIteratorInterface) []Voter {
+func (s *SmartContract) reconstructKeys(totalRegistered int, voters []Voter) []Voter {
 	curve := crypto.S256()
 	pp := curve.Params().P
 	var temp [2]*big.Int
@@ -72,7 +40,9 @@ func (s *SmartContract) reconstructKeys(voterIterator shim.StateQueryIteratorInt
 	var beforei [2]*big.Int
 	var afteri [2]*big.Int
 
-	voters := []Voter{}
+	logger.Info("Total registered: ", totalRegistered)
+	logger.Info("Number of voters: ", len(voters))
+
 	// Step 1 is to compute the index 1 reconstructed key
 	voterOne := voters[1]
 	voterOneRegisteredKey := voterOne.registeredKey

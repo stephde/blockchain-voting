@@ -1,71 +1,66 @@
 package main
 
 import (
-	"fmt"
+	"crypto/ecdsa"
+	"math/big"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	sc "github.com/hyperledger/fabric/protos/peer"
 )
 
-func (s *SmartContract) submitVote(stub shim.ChaincodeStubInterface, args []string) sc.Response {
-	if !s.inState(stub, VOTE) {
-		return shim.Error("Wrong state, expected VOTE")
-	}
+func (s *SmartContract) submitVoteInternal(stub shim.ChaincodeStubInterface,
+	userID string,
+	params [4]*big.Int,
+	y *ecdsa.PublicKey,
+	a1 *ecdsa.PublicKey,
+	b1 *ecdsa.PublicKey,
+	a2 *ecdsa.PublicKey,
+	b2 *ecdsa.PublicKey) sc.Response {
 
-	if len(args) != 2 {
-		return shim.Error("Expecting two arguments: UserID and Vote")
-	}
-
-	txid := stub.GetTxID()
-	userID := args[0]
-	vote := args[1]
+	// logger.Info("Creator is ", creator)
+	// logger.Info("Err is ", err)
+	// logger.Info("UserId is ", userID)
 
 	// Make sure the sender can vote and hasn't already voted
-	var registered map[string]struct{}
+	var registered map[string]bool
+	var votecast map[string]bool
+	var voters map[string]Voter
 	GetState(stub, "registered", &registered)
+	GetState(stub, "votecast", &votecast)
+	GetState(stub, "voters", &voters)
 
-	votecastCompositeIndex := "varName~userID~txID"
-	votecastName := "votecast"
+	value1, found1 := registered[userID]
+	value2, found2 := votecast[userID]
 
-	deltaResultsIterator, deltaErr := stub.GetStateByPartialCompositeKey(votecastCompositeIndex, []string{votecastName, userID})
-	if deltaErr != nil {
-		return shim.Error(fmt.Sprintf("Could not retrieve value for %s: %s", votecastName, deltaErr.Error()))
-	}
-	defer deltaResultsIterator.Close()
+	if found1 && found2 && value1 && !value2 {
+		for i := range voters {
+			if voters[i].address == userID {
+				v := voters[i]
+				s.verify1outOf2ZKP(v, params, y, a1, b1, a2, b2)
+				votecast[userID] = true
+				v.vote = []*big.Int{y.X, y.Y}
+				voters[i] = v
 
-	_, found1 := registered[userID]
-	hasVoted := deltaResultsIterator.HasNext()
-
-	if !found1 || hasVoted {
-		if !found1 {
-			return shim.Error(userID + " is not allowed to vote - not registered")
+			}
 		}
-		return shim.Error(userID + " is not allowed to vote - already voted")
+
+		PutState(stub, "voters", voters)
+		PutState(stub, "votecast", votecast)
+		return shim.Success(nil)
+		// } else {
+		// return shim.Error("Verirfy1outOf2ZKP failed")
+		// }
+
+	} else {
+		return shim.Error("User is not allowed to vote")
+	}
+}
+
+func (s *SmartContract) submitVote(stub shim.ChaincodeStubInterface, args []string) sc.Response {
+	if !s.inState(stub, VOTE) {
+		return shim.Error("Wrong state")
 	}
 
-	// TODO: userID could be voting key and vote could be ZKP encrypted
-	compositeIndexName := "varName~userID~vote~txID"
-	name := "vote"
-	compositeKey, compositeErr := stub.CreateCompositeKey(compositeIndexName, []string{name, userID, vote, txid})
-	if compositeErr != nil {
-		return shim.Error(fmt.Sprintf("Could not create a composite key for %s: %s", name, compositeErr.Error()))
-	}
-
-	// User is registered and did not cast vote yet
-	compositePutErr := stub.PutState(compositeKey, []byte{0x00})
-	if compositePutErr != nil {
-		return shim.Error(fmt.Sprintf("Could not put operation for %s in the ledger: %s", name, compositePutErr.Error()))
-	}
-
-	// Saving votecast
-	votecastCompositeKey, votecastCompositeErr := stub.CreateCompositeKey(votecastCompositeIndex, []string{votecastName, userID, txid})
-	if votecastCompositeErr != nil {
-		return shim.Error(fmt.Sprintf("Could not create a composite key for %s: %s", votecastName, votecastCompositeErr.Error()))
-	}
-	compositePutErr = stub.PutState(votecastCompositeKey, []byte{0x00})
-	if compositePutErr != nil {
-		return shim.Error(fmt.Sprintf("Could not put operation for %s in the ledger: %s", votecastName, compositePutErr.Error()))
-	}
-
-	return shim.Success(nil)
+	return shim.Error("Not implemented yet")
+	// return s.submitVoteInternal(stub, v, params, y, a1, b1, a2, b2)
 }

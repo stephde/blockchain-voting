@@ -1,7 +1,9 @@
 package main
 
 import (
-	"fmt"
+	"crypto/ecdsa"
+	"encoding/json"
+	"math/big"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 	sc "github.com/hyperledger/fabric/protos/peer"
@@ -9,37 +11,57 @@ import (
 
 func (s *SmartContract) register(stub shim.ChaincodeStubInterface, args []string) sc.Response {
 	if !s.inState(stub, SIGNUP) {
-		return shim.Error("Wrong state, expected SIGNUP")
+		return shim.Error("Wrong state")
 	}
 
-	if len(args) != 1 {
-		return shim.Error("Incorrect number of arguments, expecting userID")
+	if len(args) != 3 {
+		return shim.Error("Wrong number of arguments, expected 3")
 	}
 
-	userID := args[0]
-	// Retrieve info needed for the update procedure
-	txid := stub.GetTxID()
-	compositeIndexName := "varName~userID~txID"
-	name := "register"
+	// TODO: what do these names mean?
+	// TODO: error handling
 
-	// Create the composite key that will allow us to query for all deltas on a particular variable
-	compositeKey, compositeErr := stub.CreateCompositeKey(compositeIndexName, []string{name, userID, txid})
-	if compositeErr != nil {
-		return shim.Error(fmt.Sprintf("Could not create a registration composite key for %s: %s", userID, compositeErr.Error()))
-	}
+	userIDBytes, _ := stub.GetCreator()
+	userID := string(userIDBytes)
+
+	// Public key of voter: xG
+	var xG []*big.Int
+	json.Unmarshal([]byte(args[0]), &xG)
+
+	publicKey := new(ecdsa.PublicKey)
+	publicKey.X = xG[0]
+	publicKey.Y = xG[1]
+
+	var vG []*big.Int
+	json.Unmarshal([]byte(args[1]), &vG)
+
+	var r big.Int
+	json.Unmarshal([]byte(args[2]), &r)
 
 	var eligible map[string]bool
 	GetState(stub, "eligible", &eligible)
 
-	if eligible[userID] {
-		// Save the composite key index
-		compositePutErr := stub.PutState(compositeKey, []byte{0x00})
-		if compositePutErr != nil {
-			return shim.Error(fmt.Sprintf("Could not put registration for %s in the ledger: %s", userID, compositePutErr.Error()))
-		}
-		return shim.Success(nil)
+	var registered map[string]bool
+	GetState(stub, "registered", &registered)
+
+	isEligible := eligible[userID]
+	isRegistered := registered[userID]
+
+	var emptyVote []*big.Int
+	emptyReconstructedKey := new(ecdsa.PublicKey)
+	voter := Voter{userID, publicKey, emptyReconstructedKey, emptyVote}
+
+	if isEligible && !isRegistered && s.verifyZKP(voter, &r, vG) {
+		registered[userID] = true
+		PutState(stub, "registered", registered)
+
+		// voter := Voter{userID, xG, {}, {}}
+
+		var totalRegistered int
+		GetState(stub, "totalRegistered", &totalRegistered)
+		totalRegistered = totalRegistered + 1
+		PutState(stub, "totalRegistered", totalRegistered)
 	}
 
-	return shim.Error("User " + userID + " is not eligible")
-
+	return shim.Success(nil)
 }

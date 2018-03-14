@@ -159,9 +159,10 @@ func Test_VerifyYesVote(t *testing.T) {
 	publicKeyECDSA3, _ := generateKeyPair()
 	var emptyVote []*big.Int
 	emptyReconstructedKey := new(ecdsa.PublicKey)
-	voter1 := Voter{"userID1", publicKeyECDSA1, emptyReconstructedKey, emptyVote}
-	voter2 := Voter{"userID2", publicKeyECDSA2, emptyReconstructedKey, emptyVote}
-	voter3 := Voter{"userID3", publicKeyECDSA3, emptyReconstructedKey, emptyVote}
+	userID1, userID2, userID3 := "userID1", "userID2", "userID3"
+	voter1 := Voter{userID1, publicKeyECDSA1, emptyReconstructedKey, emptyVote}
+	voter2 := Voter{userID2, publicKeyECDSA2, emptyReconstructedKey, emptyVote}
+	voter3 := Voter{userID3, publicKeyECDSA3, emptyReconstructedKey, emptyVote}
 
 	scc := new(SmartContract)
 

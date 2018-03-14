@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_Register(t *testing.T) {
+func Ignore_Register(t *testing.T) {
 	stub := shim.NewMockStub("test_register", new(SmartContract))
 
 	userID := "userId"
