@@ -48,6 +48,9 @@ func (s *SmartContract) computeTally(stub shim.ChaincodeStubInterface) sc.Respon
 		if tempResult[0] == big.NewInt(0) {
 			finalTally := []int{0, totalRegistered}
 			finalTallyBytes, _ := json.Marshal(finalTally)
+
+			s.transitionToState(stub, FINISHED)
+
 			return shim.Success(finalTallyBytes)
 		} else {
 			tempG := []*big.Int{curve.Params().Gx, curve.Params().Gy}
@@ -55,6 +58,9 @@ func (s *SmartContract) computeTally(stub shim.ChaincodeStubInterface) sc.Respon
 				if tempResult[0] == tempG[0] {
 					finalTally := []int{i, totalRegistered}
 					finalTallyBytes, _ := json.Marshal(finalTally)
+
+					s.transitionToState(stub, FINISHED)
+
 					return shim.Success(finalTallyBytes)
 				}
 				tempG[0], tempG[1] = curve.Add(tempG[0], tempG[1], curve.Params().Gx, curve.Params().Gy)
@@ -62,16 +68,8 @@ func (s *SmartContract) computeTally(stub shim.ChaincodeStubInterface) sc.Respon
 		}
 
 		// Something bad happened, we should never get here
-		finalTally := []int{0, 0}
-		finalTallyBytes, _ := json.Marshal(finalTally)
-		return shim.Success(finalTallyBytes)
+		return shim.Error("There has been a problem when computing the final tally")
 	}
 
-	// All votes have been accounted for...
-	// Get tally and change state to 'Finished'
-	s.transitionToState(stub, FINISHED)
-
-	// todo
-	return shim.Error("Not implemented yet")
-
+	return shim.Error("There has been a problem when computing the final tally")
 }

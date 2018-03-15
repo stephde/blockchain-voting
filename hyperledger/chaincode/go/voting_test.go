@@ -1,9 +1,7 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"strconv"
 	"testing"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
@@ -64,57 +62,4 @@ func checkFailingInvoke(t *testing.T, stub *shim.MockStub, args [][]byte) {
 func Test_InvalidFunctionName(t *testing.T) {
 	stub := shim.NewMockStub("test_invalid_question", new(SmartContract))
 	checkFailingInvoke(t, stub, [][]byte{[]byte("someInvalidFunction")})
-}
-
-func Test_End2End_Test(t *testing.T) {
-	userID1 := "a"
-	userID2 := "b"
-	userID3 := "c"
-
-	stub := shim.NewMockStub("test_invalid_question", new(SmartContract))
-	// init vote
-	checkInvoke(t, stub, [][]byte{[]byte("initVote")})
-
-	// Set eligible users
-	checkInvoke(t, stub, [][]byte{[]byte("setEligible"),
-		[]byte(userID1),
-		[]byte(userID2),
-		[]byte(userID3)})
-
-	// Begin SignUp
-	checkInvoke(t, stub, [][]byte{[]byte("beginSignUp"), []byte("Do you like Blockchain?")})
-
-	// Register users
-	checkInvoke(t, stub, [][]byte{[]byte("register"), []byte(userID1)})
-	checkInvoke(t, stub, [][]byte{[]byte("register"), []byte(userID2)})
-	checkInvoke(t, stub, [][]byte{[]byte("register"), []byte(userID3)})
-
-	// Begin Vote
-	checkInvoke(t, stub, [][]byte{[]byte("finishRegistrationPhase")})
-
-	// Vote
-	checkInvoke(t, stub, [][]byte{[]byte("submitVote"), []byte(userID1), []byte(strconv.Itoa(0))})
-	checkInvoke(t, stub, [][]byte{[]byte("submitVote"), []byte(userID2), []byte(strconv.Itoa(1))})
-	checkInvoke(t, stub, [][]byte{[]byte("submitVote"), []byte(userID3), []byte(strconv.Itoa(1))})
-
-	// Compute computeTally
-	expectedResult, _ := json.Marshal(Result{3, map[int]int{0: 1, 1: 2}})
-	checkQuery(t, stub, "computeTally", string(expectedResult))
-}
-
-func Test_End2End2(t *testing.T) {
-	stub := shim.NewMockStub("test_invalid_question", new(SmartContract))
-
-	checkInvoke(t, stub, [][]byte{[]byte("initVote")})
-
-	checkInvoke(t, stub, [][]byte{[]byte("setEligible"), []byte("a"), []byte("b"), []byte("c")})
-
-	checkInvoke(t, stub, [][]byte{[]byte("beginSignUp"), []byte("Yes?")})
-
-	checkInvoke(t, stub, [][]byte{[]byte("register"), []byte("a")})
-	checkInvoke(t, stub, [][]byte{[]byte("register"), []byte("b")})
-	checkInvoke(t, stub, [][]byte{[]byte("register"), []byte("c")})
-
-	checkInvoke(t, stub, [][]byte{[]byte("finishRegistrationPhase")})
-
 }

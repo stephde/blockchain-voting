@@ -16,7 +16,7 @@ import (
  * Ignored per default to reduce execution time of unit tests
  */
 // func Test_End2End(t *testing.T) {
-func Ignore_End2End(t *testing.T) {
+func Test_End2End(t *testing.T) {
 
 	users := []int{10, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000}
 	//users := []int{10}

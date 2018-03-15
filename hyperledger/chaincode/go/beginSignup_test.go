@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Ignore_BeginSignup(t *testing.T) {
+func Test_BeginSignup(t *testing.T) {
 	stub := shim.NewMockStub("test_beginSignup", new(SmartContract))
 
 	question := "What is the question?"
