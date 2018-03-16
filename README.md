@@ -66,7 +66,7 @@ At this point we do not want to provide a in-depth benchmark for Hyperledger, bu
 
 The first benchmark compares the chaincode implementations with and without cryptography.
 Since we were not able to run cryto chaincode on Hyperledger, we did this in unit tests using a mocked Hyperledger instance.
-Obviously a real Hyperledger system will behave differently, so that the absolute execution times are not that meaningful.
+Obviously, a real Hyperledger system will behave differently, so that the absolute execution times are not that meaningful.
 They are good enough though to estimate the overhead for doing cryptography.
 
 The second benchmark runs a voting on a Hyperledger instance (without cryptography).
@@ -87,3 +87,31 @@ Obviously Hyperledger offers lots of options to tune its performance, so there i
 
 We noticed that the throughput was mainly limited by Hyperledger's event hub, which lost some transactions when sending too many transactions in a short amount of time.
 Within the span of the project we were not able to fix this properly.
+
+## Next Steps
+
+In a student's project there is usually not enough time to implement _everything_ that is needed to run it in production.
+At the end of this project we would like to point out three topics that interested readers may feel free to improve on.
+
+__Implement Consensus__
+
+As of now, Hyperledger does not provide a default implementation of a consensus protocol.
+Obviously, the consensus protocol is one of the most critical parts of any blockchain application, so providing an implementation that may be used within different applications would be a big achievement.
+
+With that in mind the next point becomes feasible.
+
+__Create test setup with multiple orderer nodes__
+
+Within our project only scaled the number of peer nodes, but not the number of orderer nodes in our Hyperledger network.
+But, having only one orderer node again implies that one has to trust this node.
+As soon as there is a consensus implementation, scaling the number of orderer nodes is the logical next step.
+
+__Improve Crypto Implementation in Go__
+
+All the cryptographic implementation that is being used for encrypting the votes and conducting the vote, is taken from an implementation for Ethereum written in Solidity.
+We set ourselves the goal to port this code to Go and improve its readability and maintainability.
+In sum we did not achieve the latter two ones.
+Without an in-depth understanding of what is happening in the cryptographic part it is not possible to alter the source code.
+Additionally the lack of understanding makes finding bugs hard.
+
+We encourage interested readers to improve the crypto chaincode, fix existing bugs, and provide a more readable implementation.
