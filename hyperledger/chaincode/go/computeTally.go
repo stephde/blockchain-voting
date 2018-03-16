@@ -9,6 +9,9 @@ import (
 	sc "github.com/hyperledger/fabric/protos/peer"
 )
 
+/*
+ * After all votes has been cast this function computes the tally.
+ */
 func (s *SmartContract) computeTally(stub shim.ChaincodeStubInterface) sc.Response {
 
 	if !s.inState(stub, VOTE) {
@@ -28,6 +31,7 @@ func (s *SmartContract) computeTally(stub shim.ChaincodeStubInterface) sc.Respon
 		return shim.Error(fmt.Sprintf("Could not retrieve value for %s: %s", name, deltaErr.Error()))
 	}
 	defer deltaResultsIterator.Close()
+
 	// Check the variable existed
 	if !deltaResultsIterator.HasNext() {
 		return shim.Error(fmt.Sprintf("No variable by the name %s exists", name))

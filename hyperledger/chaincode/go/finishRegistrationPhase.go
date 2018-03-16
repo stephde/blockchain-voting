@@ -7,6 +7,10 @@ import (
 	sc "github.com/hyperledger/fabric/protos/peer"
 )
 
+/*
+ * In the original voting protocol this stage is used to generate personal voting keys.
+ * In this non-crypto implementation it is only used to verify that there are some registered users.
+ */
 func (s *SmartContract) finishRegistrationPhase(stub shim.ChaincodeStubInterface) sc.Response {
 	if !s.inState(stub, SIGNUP) {
 		return shim.Error("Wrong state, expected SIGNUP")

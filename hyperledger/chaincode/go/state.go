@@ -28,6 +28,9 @@ func (state StateEnum) String() string {
 	return states[state]
 }
 
+/*
+ * Verifies that vote is in a specific state
+ */
 func (s *SmartContract) inState(stub shim.ChaincodeStubInterface, expectedState StateEnum) bool {
 	var state StateEnum
 	GetState(stub, "state", &state)
@@ -39,6 +42,9 @@ func (s *SmartContract) inState(stub shim.ChaincodeStubInterface, expectedState 
 	return success
 }
 
+/*
+ * At the end of a voting phase we might need to transition to the next state.
+ */
 func (s *SmartContract) transitionToState(stub shim.ChaincodeStubInterface, newState StateEnum) {
 	PutState(stub, "state", newState)
 }

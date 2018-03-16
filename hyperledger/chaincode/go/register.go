@@ -7,6 +7,9 @@ import (
 	sc "github.com/hyperledger/fabric/protos/peer"
 )
 
+/*
+ * All eligible voters might register for a vote using this function.
+ */
 func (s *SmartContract) register(stub shim.ChaincodeStubInterface, args []string) sc.Response {
 	if !s.inState(stub, SIGNUP) {
 		return shim.Error("Wrong state, expected SIGNUP")
@@ -31,6 +34,7 @@ func (s *SmartContract) register(stub shim.ChaincodeStubInterface, args []string
 	var eligible map[string]bool
 	GetState(stub, "eligible", &eligible)
 
+	// Only elegible users may register
 	if eligible[userID] {
 		// Save the composite key index
 		compositePutErr := stub.PutState(compositeKey, []byte{0x00})
