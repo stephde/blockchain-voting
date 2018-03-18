@@ -15,12 +15,15 @@ Hyperledger = function() {
   const defaultUserId = 'user1';
 
   function init (){
-    _this.hlAdapter = initClient.initFabricClient(host, channelId, defaultUserId, _this.onTransactionCommitted);
-    _this.channel = _this.hlAdapter.channel;
-    _this.client = _this.hlAdapter.client;
-    _this.eventHub = _this.hlAdapter.eventHub;
-    _this.commitedTransactions = []
-    _this.pendingTransactions = []
+    initClient.initFabricClient(host, channelId, defaultUserId, _this.onTransactionCommitted)
+        .then((hlAdapter) => {
+            _this.hlAdapter = hlAdapter;
+            _this.channel = _this.hlAdapter.channel;
+            _this.client = _this.hlAdapter.client;
+            _this.eventHub = _this.hlAdapter.eventHub;
+            _this.commitedTransactions = []
+            _this.pendingTransactions = []
+        });
     return this;
   }
 

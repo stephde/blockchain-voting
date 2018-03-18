@@ -10,39 +10,41 @@ const peerPort = ':7051';
 const eventHubPort = ':7053';
 
 exports.initFabricClient = function (host, channelId, userId, onTransactionCommitted) {
-    let fabricClient = new Fabric_Client();
+    return new Promise(((resolve, reject) => {
 
-    // setup the fabric network
-    let channel = fabricClient.newChannel(channelId); //
-    let peer = fabricClient.newPeer(host + peerPort);
-    channel.addPeer(peer);
-    let order = fabricClient.newOrderer(host + ordererPort);
-    channel.addOrderer(order);
+        let fabricClient = new Fabric_Client();
 
-    // get an eventhub once the fabric client has a user assigned. The user
-    // is required bacause the event registration must be signed
-    let eventHub = fabricClient.newEventHub();
-    eventHub.setPeerAddr(host + eventHubPort);
+        // setup the fabric network
+        let channel = fabricClient.newChannel(channelId); //
+        let peer = fabricClient.newPeer(host + peerPort);
+        channel.addPeer(peer);
+        let order = fabricClient.newOrderer(host + ordererPort);
+        channel.addOrderer(order);
 
-    let blockListenerId = null;
-    initUserContext(fabricClient, userId)
-        .then((userContext) => {
-            blockListenerId = initBlockEventListener(eventHub, channelId, onTransactionCommitted);
-            eventHub.connect();
-        })
 
-    let clientWrapper = {
-        client: fabricClient,
-        channel: channel,
-        peer: peer,
-        eventHub: eventHub,
-        blockListenerId: blockListenerId
-    };
+        initUserContext(fabricClient, userId)
+            .then((userContext) => {
+                // get an eventhub once the fabric client has a user assigned. The user
+                // is required because the event registration must be signed
+                let eventHub = fabricClient.newEventHub();
+                eventHub.setPeerAddr(host + eventHubPort);
 
-    //console.log("Fabric client has been initialized with : ", clientWrapper);
-    console.log("Fabric client has been initialized.");
+                let blockListenerId = initBlockEventListener(eventHub, channelId, onTransactionCommitted);
+                eventHub.connect();
 
-    return clientWrapper;
+                let clientWrapper = {
+                    client: fabricClient,
+                    channel: channel,
+                    peer: peer,
+                    eventHub: eventHub,
+                    blockListenerId: blockListenerId
+                };
+
+                console.log("Fabric client has been initialized.");
+                resolve(clientWrapper);
+            })
+
+    }))
 }
 
 function initBlockEventListener(eventHub, myChannelId, onTransactionCommitted) {
@@ -57,7 +59,6 @@ function initBlockEventListener(eventHub, myChannelId, onTransactionCommitted) {
 
         block.data.data.forEach(onTransactionCommitted)
     }, (err) => {
-         console.log('\n\nOh snap!\n\n');
          console.log(err)
    });
 }
@@ -76,7 +77,7 @@ function initUserContext(fabricClient, userId) {
             // console.log('Successfully loaded user1 from persistence');
             let member_user = userFromStore;
         } else {
-            throw new Error('Failed to get user1.... run registerUser.js');
+            throw new Error('Failed to get user.... run registerUser.js');
         }
 
         return userFromStore;
